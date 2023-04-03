@@ -57,7 +57,7 @@ nemo-emblems==5.6.0
 netaddr==0.8.0
 netifaces==0.11.0
 numpy==1.24.2
-oauthlib==3.2.0
+oauthlib==3.2.2
 onboard==1.4.1
 opencv-python==4.7.0.72
 orjson==3.8.9
