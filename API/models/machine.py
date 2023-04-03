@@ -5,11 +5,12 @@ from sqlalchemy.schema import Column, Table
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import Boolean, DateTime, Integer, String
 
-# Table definitions
 
 # Table to store the machines
 class Machines(Base):
+
     __tablename__ = "machines"
+
     machine_id = Column(Integer, primary_key=True, autoincrement=True)
     group_name = Column(String(50), nullable=False)
     hostname = Column(String(50), nullable=False, unique=True, index=True)

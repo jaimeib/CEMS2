@@ -17,3 +17,6 @@ class Machine(BaseModel):
     password: str = Field(max_length=255)
     status: bool = True
     enable: bool = True
+
+    class Config:
+        orm_mode = True  # This is needed to return the model as a dictionary

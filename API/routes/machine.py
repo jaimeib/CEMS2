@@ -1,37 +1,28 @@
-# Description: This file contains the CRUD operations for the machines table.
+# Description: API calls to CRUD operations for the machines table.
 
 from cryptography.fernet import Fernet
-from database.config import Base, SessionLocal, engine
+from database.config import Base, engine, get_db
 from fastapi import APIRouter, Depends, HTTPException
 from models.machine import Machines
 from schemas.machine import Machine
 from sqlalchemy.orm import Session
 
 # Create the machines router
-machine = APIRouter()
-
-# Encrypt the passwords
-key = Fernet.generate_key()
-encription = Fernet(key)
+machines = APIRouter()
 
 # Create the databases tables
 Base.metadata.create_all(bind=engine)
 
-# Create a database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
+# Encrypt the passwords using Fernet
+key = Fernet.generate_key()
+encription = Fernet(key)
 
 # CRUD operations
 
 # CREATE
 
 # Create a new machine
-@machine.post("/machines")
+@machines.post("/machines", response_model=Machine)
 def create_machine(machine: Machine, db: Session = Depends(get_db)):
 
     # Create a new machine model with the data from the request
@@ -47,7 +38,17 @@ def create_machine(machine: Machine, db: Session = Depends(get_db)):
 
     # Check if the machine already exists (by hostname)
     if db.query(Machines).filter(Machines.hostname == machine.hostname).first():
-        raise HTTPException(status_code=400, detail="Machine already exists")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Machine already exists by hostname ({machine.hostname})",
+        )
+
+    # Check if the machine already exists (by IP)
+    if db.query(Machines).filter(Machines.ip == machine.ip).first():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Machine already exists by IP address ({machine.ip})",
+        )
 
     # Add the machine to the database
     db.add(machine_model)
@@ -60,7 +61,7 @@ def create_machine(machine: Machine, db: Session = Depends(get_db)):
 # READ
 
 # Get all the machines
-@machine.get("/machines")
+@machines.get("/machines", response_model=list[Machine])
 def get_machines(db: Session = Depends(get_db)):
 
     # Get all the machines from the database
@@ -68,7 +69,7 @@ def get_machines(db: Session = Depends(get_db)):
 
 
 # Get a machine by machine_id
-@machine.get("/machines/id/{machine_id}")
+@machines.get("/machines/{machine_id}")
 def get_machine_by_machine_id(machine_id: str, db: Session = Depends(get_db)):
 
     # Get the machine from the database
@@ -76,7 +77,9 @@ def get_machine_by_machine_id(machine_id: str, db: Session = Depends(get_db)):
 
     # Check if the machine exists
     if machine is None:
-        raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Machine whit ID: {machine_id} not found"
+        )
 
     # Return the machine
     return machine
@@ -85,7 +88,7 @@ def get_machine_by_machine_id(machine_id: str, db: Session = Depends(get_db)):
 # UPDATE
 
 # Update a machine by machine_id
-@machine.put("/machines/{machine_id}")
+@machines.put("/machines/{machine_id}", response_model=Machine)
 def update_machine(machine_id: str, machine: Machine, db: Session = Depends(get_db)):
 
     # Get the machine from the database
@@ -93,17 +96,21 @@ def update_machine(machine_id: str, machine: Machine, db: Session = Depends(get_
 
     # Check if the machine exists
     if machine_model is None:
-        raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Machine with ID: {machine_id} not found"
+        )
 
     # Check if the updated data not conflict with other machines (Hostname and IP)
     if db.query(Machines).filter(Machines.hostname == machine.hostname).first():
         raise HTTPException(
-            status_code=400, detail="There is another machine with the same hostname"
+            status_code=400,
+            detail=f"There is another machine with the same hostname ({machine.hostname})",
         )
 
     if db.query(Machines).filter(Machines.ip == machine.ip).first():
         raise HTTPException(
-            status_code=400, detail="There is another machine with the same IP"
+            status_code=400,
+            detail=f"There is another machine with the same IP address ({machine.ip})",
         )
 
     # Update the machine data
@@ -125,15 +132,17 @@ def update_machine(machine_id: str, machine: Machine, db: Session = Depends(get_
 
 
 # Patch machine status by machine_id
-@machine.patch("/machines/status/{machine_id}")
-def patch_machine_status(machine_id: str, status: bool, db: Session = Depends(get_db)):
+@machines.patch("/machines/status/{machine_id}", response_model=str)
+def update_machine_status(machine_id: str, status: bool, db: Session = Depends(get_db)):
 
     # Get the machine from the database
     machine_model = db.query(Machines).filter(Machines.machine_id == machine_id).first()
 
     # Check if the machine exists
     if machine_model is None:
-        raise HTTPException(status_code=404, detail=f"Machine {machine_id} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Machine with ID: {machine_id} not found"
+        )
 
     # Update the machine status
     machine_model.status = status
@@ -143,12 +152,12 @@ def patch_machine_status(machine_id: str, status: bool, db: Session = Depends(ge
     db.commit()
 
     # Return the machine updated
-    return f"Machine {machine_id} status updated to {status}"
+    return f"Machine with ID: {machine_id} status updated to {status}"
 
 
 # Patch machine enable by machine_id
-@machine.patch("/machines/enable/{machine_id}")
-def patch_machine_enable(machine_id: str, enable: bool, db: Session = Depends(get_db)):
+@machines.patch("/machines/enable/{machine_id}", response_model=str)
+def update_machine_enable(machine_id: str, enable: bool, db: Session = Depends(get_db)):
 
     # Get the machine from the database
     machine_model = (
@@ -172,7 +181,7 @@ def patch_machine_enable(machine_id: str, enable: bool, db: Session = Depends(ge
 # DELETE
 
 # Delete a machine by machine_id
-@machine.delete("/machines/{machine_id}")
+@machines.delete("/machines/{machine_id}", response_model=Machine)
 def delete_machine(machine_id: str, db: Session = Depends(get_db)):
 
     # Get the machine from the database
