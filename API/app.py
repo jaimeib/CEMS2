@@ -1,5 +1,6 @@
 # Description: FastAPI app using the routers from the API/routes folder
 
+from database.config import create_tables
 from fastapi import FastAPI
 from routes.machine import machines
 from routes.setting import settings
@@ -11,11 +12,14 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Create the databases tables (if they don't exist)
+create_tables()
+
 # Start server with: uvicorn app:app --reload
 # Open browser to: http://localhost:8000/
 
-# Documentation con Swagger UI: http://localhost:8000/docs
-# Documentacion con ReDoc: http://localhost:8000/redoc
+# Documentation and tester with Swagger UI: http://localhost:8000/docs
+# Documentation with ReDoc: http://localhost:8000/redoc
 
 # Include the machines router
 app.include_router(machines, tags=["Machine Persistence Manager"])
