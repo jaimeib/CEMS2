@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class BaseSetting(BaseModel):
-    key: str = Field(max_length=255)
+    key: str = Field(max_length=50)
     value: str = Field(max_length=255)
     description: Optional[str] = Field(max_length=255)
 

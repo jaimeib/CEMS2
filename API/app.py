@@ -11,7 +11,6 @@ app = FastAPI(
     description="REST API for the Energy Management System",
     version="0.1.0",
 )
-
 # Create the databases tables (if they don't exist)
 create_tables()
 

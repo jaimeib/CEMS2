@@ -40,7 +40,7 @@ def create_machine(machine: BaseMachine, db: Session = Depends(get_db)):
     - **enable**: True if the machine is enabled on the system, False otherwise
 
     **Raises:**
-        HTTPException: If the machine already exists by hostname or IP address
+        HTTPException: 404 - If the machine already exists by hostname or IP address
 
     **Returns:**
         The machine created
@@ -135,7 +135,7 @@ def get_machine_by_machine_id(machine_id: str, db: Session = Depends(get_db)):
     - **created_at**: The date and time when the machine was created
     - **updated_at**: The date and time when the machine was updated
 
-    **Raises:** HTTPException: If the machine does not exist by ID
+    **Raises:** HTTPException: 404 - If the machine does not exist by ID
 
     **Returns:** The machine
     """
@@ -147,7 +147,7 @@ def get_machine_by_machine_id(machine_id: str, db: Session = Depends(get_db)):
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine whit ID: {machine_id} not found",
+            detail=f"Machine with ID: {machine_id} not found",
         )
 
     # Return the machine
@@ -178,7 +178,7 @@ def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
     - **created_at**: The date and time when the machine was created
     - **updated_at**: The date and time when the machine was updated
 
-    **Raises:** HTTPException: If the machine does not exist by hostname
+    **Raises:** HTTPException: 404 - If the machine does not exist by hostname
 
     **Returns:** The machine
     """
@@ -190,7 +190,7 @@ def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine whit hostname: {hostname} not found",
+            detail=f"Machine with hostname: {hostname} not found",
         )
 
     # Return the machine
@@ -221,13 +221,23 @@ def get_machine_by_group(group_name: str, db: Session = Depends(get_db)):
     - **created_at**: The date and time when the machine was created
     - **updated_at**: The date and time when the machine was updated
 
-    **Raises:** HTTPException: If the machine does not exist by group_name
+    **Raises:** HTTPException: 404 - If the machine does not exist by group_name
 
     **Returns:** sThe list of machines
     """
 
     # Get the machines from the database
-    return db.query(Machines).filter(Machines.group_name == group_name).all()
+    machines = db.query(Machines).filter(Machines.group_name == group_name).all()
+
+    # Check if the is at least one machine
+    if len(machines) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Machine with group name: {group_name} not found",
+        )
+
+    # Get the machines from the database
+    return machines
 
 
 # UPDATE
@@ -256,7 +266,7 @@ def update_machine(
     - **enable**: True if the machine is enabled on the system, False otherwise
 
     **Raises:**
-        HTTPException: If the machine does not exist by ID or if the updated data not conflict with other machines (Hostname and IP)
+        HTTPException: 404 - If the machine does not exist by ID or if the updated data not conflict with other machines (Hostname and IP)
 
     **Returns:** The updated machine
     """
@@ -308,7 +318,7 @@ def update_machine_status(machine_id: str, status: bool, db: Session = Depends(g
     """
     Update a machine status by its ID
 
-    **Raises:** HTTPException: If the machine does not exist by ID
+    **Raises:** HTTPException: 404 - If the machine does not exist by ID
 
     **Returns:** The updated machine
     """
@@ -346,7 +356,7 @@ def update_machine_enable(machine_id: str, enable: bool, db: Session = Depends(g
     """
     Update if the machine is enabled or not in the system by its ID
 
-    **Raises:** HTTPException: If the machine does not exist by ID
+    **Raises:** HTTPException: 404 - If the machine does not exist by ID
 
     **Returns:** The updated machine
     """
@@ -358,7 +368,7 @@ def update_machine_enable(machine_id: str, enable: bool, db: Session = Depends(g
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine {machine_id} not found",
+            detail=f"Machine with ID: {machine_id} not found",
         )
 
     # Update the machine enabled
@@ -385,7 +395,9 @@ def delete_machine(machine_id: str, db: Session = Depends(get_db)):
     """
     Delete a machine from the database by its ID
 
-    **Raises:** HTTPException: If the machine does not exist by ID
+    **Raises:** HTTPException: 404 - If the machine does not exist by ID
+
+    **Returns:** Status code: 204 - No Content
     """
 
     # Get the machine from the database
@@ -395,7 +407,7 @@ def delete_machine(machine_id: str, db: Session = Depends(get_db)):
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine {machine_id} not found",
+            detail=f"Machine with ID: {machine_id} not found",
         )
 
     # Delete the machine from the database
