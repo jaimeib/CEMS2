@@ -8,7 +8,6 @@ from sqlalchemy.sql.sqltypes import Boolean, DateTime, Integer, String
 
 # Table to store the machines
 class Machines(Base):
-
     __tablename__ = "machines"
 
     machine_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -19,6 +18,6 @@ class Machines(Base):
     user = Column(String(255), nullable=False)
     password = Column(String(255), nullable=False)
     status = Column(Boolean, nullable=False, default=True)
-    enable = Column(Boolean, nullable=False, default=True)
+    available = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, default=func.now())
     modified_at = Column(DateTime, default=func.now(), onupdate=func.now())

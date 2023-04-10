@@ -17,7 +17,7 @@ class BaseMachine(BaseModel):
     user: str = Field(max_length=255)
     password: str = Field(max_length=255)
     status: bool = True
-    enable: bool = True
+    available: bool = True
 
     class Config:
         orm_mode = True  # This is needed to return the model as a dictionary
