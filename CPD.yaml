@@ -1,0 +1,26 @@
+#File with the inital data of the cloud infraestructure
+- groupname: cloudA
+  model: Lenovo
+  hosts:
+      - hostname: cloudA1
+        ip: 10.128.1.1
+        username: root
+        password: root
+      - hostname: cloudA2
+        ip: 10.128.1.2
+        username: root
+        password: root
+
+- groupname: cloudB
+  model: IBM
+  hosts:
+      - hostname: cloudB1
+        ip: 10.128.2.1
+        username: root
+        password: root
+      - hostname: cloudB2
+        ip: 10.128.2.2
+        username: root
+        password: root
+# Declarar maquinas hosts de forma manual dentro del grupo o declarar un grupo y los rangos...
+# Siempre que se añada una maquina al fichero debe estar encendida?

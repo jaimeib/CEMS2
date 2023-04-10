@@ -1,6 +1,5 @@
 # Description: FastAPI app using the routers from the API/routes folder
-
-from database.config import create_tables
+from database.loader import load_hosts
 from fastapi import FastAPI
 from routes.machine import machines
 
@@ -17,8 +16,8 @@ app = FastAPI(
 # Documentation and tester with Swagger UI: http://localhost:8000/docs
 # Documentation with ReDoc: http://localhost:8000/redoc
 
-# Create the databases tables (if they don't exist)
-create_tables()
+# Load the hosts.yaml file into the database
+load_hosts()
 
 # Include the machines router
 app.include_router(machines, tags=["Machine Persistence Manager"])

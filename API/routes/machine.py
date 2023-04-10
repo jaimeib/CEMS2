@@ -31,11 +31,11 @@ def create_machine(machine: BaseMachine, db: Session = Depends(get_db)):
     """
     Create a new machine with the following data:
 
-    - **group_name**: The group name of the machine
+    - **groupname**: The group name of the machine
     - **hostname**: The hostname of the machine (unique)
     - **model**: The comercial name of the machine
     - **ip**: The IP address to manage the machine (unique)
-    - **user**: The user to manage the machine
+    - **username**: The username to manage the machine
     - **password**: The password to manage the machine
     - **status**: True if the machine is on, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise
@@ -93,12 +93,12 @@ def get_machines(group: str = None, db: Session = Depends(get_db)):
     """
     Get all the machines from the database with the following data:
 
-    - **machine_id**: The ID of the machine
-    - **group_name**: The group name of the machine
+    - **id**: The ID of the machine
+    - **groupname**: The group name of the machine
     - **hostname**: The hostname of the machine (unique)
     - **model**: The comercial name of the machine
     - **ip**: The IP address to manage the machine (unique)
-    - **user**: The user to manage the machine
+    - **username**: The username to manage the machine
     - **password**: The password to manage the machine
     - **status**: True if the machine is on, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise
@@ -113,9 +113,9 @@ def get_machines(group: str = None, db: Session = Depends(get_db)):
         machines_model = db.query(Machines).all()
     else:
         # Check if the group exists
-        if db.query(Machines).filter(Machines.group_name == group).first():
+        if db.query(Machines).filter(Machines.groupname == group).first():
             machines_model = (
-                db.query(Machines).filter(Machines.group_name == group).all()
+                db.query(Machines).filter(Machines.groupname == group).all()
             )
         else:
             raise HTTPException(
@@ -127,23 +127,23 @@ def get_machines(group: str = None, db: Session = Depends(get_db)):
     return machines_model
 
 
-# Get a machine by its ID (machine_id)
+# Get a machine by its ID
 @machines.get(
-    "/machines/id={machine_id}",
+    "/machines/id={id}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
     summary="Get a machine by its ID",
 )
-def get_machine_by_id(machine_id: int, db: Session = Depends(get_db)):
+def get_machine_by_id(id: int, db: Session = Depends(get_db)):
     """
     Get a machine from the database by its ID with the following data:
 
-    - **machine_id**: The ID of the machine
-    - **group_name**: The group name of the machine
+    - **id**: The ID of the machine
+    - **groupname**: The group name of the machine
     - **hostname**: The hostname of the machine (unique)
     - **model**: The comercial name of the machine
     - **ip**: The IP address to manage the machine (unique)
-    - **user**: The user to manage the machine
+    - **username**: The username to manage the machine
     - **password**: The password to manage the machine
     - **status**: True if the machine is on, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise
@@ -156,13 +156,13 @@ def get_machine_by_id(machine_id: int, db: Session = Depends(get_db)):
     """
 
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.machine_id == machine_id).first()
+    machine_model = db.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine with ID: {machine_id} not found",
+            detail=f"Machine with ID: {id} not found",
         )
 
     # Return the machine
@@ -180,12 +180,12 @@ def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
     """
     Get a machine from the database by its hostname with the following data:
 
-    - **machine_id**: The ID of the machine
-    - **group_name**: The group name of the machine
+    - **id**: The ID of the machine
+    - **groupname**: The group name of the machine
     - **hostname**: The hostname of the machine (unique)
     - **model**: The comercial name of the machine
     - **ip**: The IP address to manage the machine (unique)
-    - **user**: The user to manage the machine
+    - **username**: The username to manage the machine
     - **password**: The password to manage the machine
     - **status**: True if the machine is on, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise
@@ -214,24 +214,22 @@ def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
 # UPDATE
 
 
-# Update a machine by machine_id
+# Update a machine by id
 @machines.put(
-    "/machines/id={machine_id}",
+    "/machines/id={id}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
     summary="Update a machine by its ID",
 )
-def update_machine_by_id(
-    machine_id: str, machine: BaseMachine, db: Session = Depends(get_db)
-):
+def update_machine_by_id(id: str, machine: BaseMachine, db: Session = Depends(get_db)):
     """
     Update a machine from the database by its ID with the following data:
 
-    - **group_name**: The group name of the machine
+    - **groupname**: The group name of the machine
     - **hostname**: The hostname of the machine (unique)
     - **model**: The comercial name of the machine
     - **ip**: The IP address to manage the machine (unique)
-    - **user**: The user to manage the machine
+    - **username**: The username to manage the machine
     - **password**: The password to manage the machine
     - **status**: True if the machine is on, False otherwise
     - **available**: True if the machine is available on the system, False otherwise
@@ -243,13 +241,13 @@ def update_machine_by_id(
     """
 
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.machine_id == machine_id).first()
+    machine_model = db.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine with ID: {machine_id} not found",
+            detail=f"Machine with ID: {id} not found",
         )
 
     # Check if the updated data not conflict with other machines (Hostname and IP)
@@ -290,11 +288,11 @@ def update_machine_by_hostname(
     """
     Update a machine from the database by its hostname with the following data:
 
-    - **group_name**: The group name of the machine
+    - **groupname**: The group name of the machine
     - **hostname**: The hostname of the machine (unique)
     - **model**: The comercial name of the machine
     - **ip**: The IP address to manage the machine (unique)
-    - **user**: The user to manage the machine
+    - **username**: The username to manage the machine
     - **password**: The password to manage the machine
     - **status**: True if the machine is on, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise
@@ -340,14 +338,14 @@ def update_machine_by_hostname(
     return machine_model
 
 
-# Patch machine status by machine_id
+# Patch machine status by id
 @machines.patch(
-    "/machines/id={machine_id}/status",
+    "/machines/id={id}/status",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
     summary="Update a machine status by its ID",
 )
-def update_machine_status(machine_id: str, status: bool, db: Session = Depends(get_db)):
+def update_machine_status(id: str, status: bool, db: Session = Depends(get_db)):
     """
     Update a machine status by its ID
 
@@ -357,13 +355,13 @@ def update_machine_status(machine_id: str, status: bool, db: Session = Depends(g
     """
 
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.machine_id == machine_id).first()
+    machine_model = db.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine with ID: {machine_id} not found",
+            detail=f"Machine with ID: {id} not found",
         )
 
     # Update the machine status
@@ -416,16 +414,14 @@ def update_machine_status_by_hostname(
     return machine_model
 
 
-# Patch machine availability by machine_id
+# Patch machine availability by id
 @machines.patch(
-    "/machines/id={machine_id}/available",
+    "/machines/id={id}/available",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
     summary="Update the availability by its ID",
 )
-def update_machine_available(
-    machine_id: str, available: bool, db: Session = Depends(get_db)
-):
+def update_machine_available(id: str, available: bool, db: Session = Depends(get_db)):
     """
     Update if the machine is available or not in the system by its ID
 
@@ -435,13 +431,13 @@ def update_machine_available(
     """
 
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.machine_id == machine_id).first()
+    machine_model = db.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine with ID: {machine_id} not found",
+            detail=f"Machine with ID: {id} not found",
         )
 
     # Update the machine availabled
@@ -497,13 +493,13 @@ def update_machine_available_by_hostname(
 # DELETE
 
 
-# Delete a machine by machine_id
+# Delete a machine by id
 @machines.delete(
-    "/machines/id={machine_id}",
+    "/machines/id={id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a machine by its ID",
 )
-def delete_machine(machine_id: str, db: Session = Depends(get_db)):
+def delete_machine(id: str, db: Session = Depends(get_db)):
     """
     Delete a machine from the database by its ID
 
@@ -513,13 +509,13 @@ def delete_machine(machine_id: str, db: Session = Depends(get_db)):
     """
 
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.machine_id == machine_id).first()
+    machine_model = db.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine with ID: {machine_id} not found",
+            detail=f"Machine with ID: {id} not found",
         )
 
     # Delete the machine from the database

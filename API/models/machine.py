@@ -10,12 +10,12 @@ from sqlalchemy.sql.sqltypes import Boolean, DateTime, Integer, String
 class Machines(Base):
     __tablename__ = "machines"
 
-    machine_id = Column(Integer, primary_key=True, autoincrement=True)
-    group_name = Column(String(50), nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    groupname = Column(String(50), nullable=False)
     hostname = Column(String(50), nullable=False, unique=True, index=True)
     model = Column(String(255), nullable=False)
     ip = Column(String(16), nullable=False, unique=True)
-    user = Column(String(255), nullable=False)
+    username = Column(String(255), nullable=False)
     password = Column(String(255), nullable=False)
     status = Column(Boolean, nullable=False, default=True)
     available = Column(Boolean, nullable=False, default=True)
