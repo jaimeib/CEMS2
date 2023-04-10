@@ -22,5 +22,16 @@
         ip: 10.128.2.2
         username: root
         password: root
+# - groupname: cloudC
+#   model: HP
+#   hosts:
+#       - hostname: cloudC1
+#         ip: 10.128.3.1
+#         username: root
+#         password: root
+#       - hostname: cloudC2
+#         ip: 10.128.3.2
+#         username: root
+#         password: root
 # Declarar maquinas hosts de forma manual dentro del grupo o declarar un grupo y los rangos...
 # Siempre que se añada una maquina al fichero debe estar encendida?

@@ -1,10 +1,11 @@
 # Description: FastAPI app using the routers from the API/routes folder
 from database.loader import load_hosts
 from fastapi import FastAPI
+from log import logger
 from routes.machine import machines
 
 # Create the FastAPI app
-app = FastAPI(
+api = FastAPI(
     title="Energy Management System API",
     description="REST API for the Energy Management System",
     version="0.1.0",
@@ -20,4 +21,4 @@ app = FastAPI(
 load_hosts()
 
 # Include the machines router
-app.include_router(machines, tags=["Machine Persistence Manager"])
+api.include_router(machines, tags=["Machine Persistence Manager"])

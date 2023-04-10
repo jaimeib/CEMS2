@@ -1,5 +1,6 @@
 import yaml
 from database.config import create_tables, get_db
+from log import logger
 from models.machine import Machines
 from yaml.loader import SafeLoader
 
@@ -10,7 +11,7 @@ pending_hosts = []  # List of hosts not updated because the ip already exists pr
 
 # Load the hosts.yaml file
 def load_hosts():
-    print("Loading hosts.yaml file...")
+    logger.info("Loading the hosts.yaml file into the database.")
 
     # Obtain the list of groups from the file
     group_list = read_groups()
@@ -27,7 +28,7 @@ def load_hosts():
     # Update the available machines in the database
     update_available_machines(hosts)
 
-    print("Database updated successfully.")
+    logger.info("The hosts.yaml file has been loaded into the database.")
 
 
 # Read the file:
@@ -70,7 +71,7 @@ def host_exists(host):
             # Check the uniqueness of the ip of the new host
             repetedip_host = check_host_exists_by_ip(host["ip"])
             if repetedip_host:
-                print(
+                logger.warning(
                     f"Host {host['hostname']} was not updated because the ip {host['ip']} already exists in the database in the host {repetedip_host.hostname}."
                 )
                 # Save the host in the pending_hosts list to update it later
@@ -80,7 +81,7 @@ def host_exists(host):
         else:
             update_host(host)
     else:
-        print(f"Host {host['hostname']} is already up to date.")
+        logger.debug(f"Host {host['hostname']} is already up to date.")
 
     # Check if there are hosts in the pending_hosts list (not updated because the ip already exists previously)
     if pending_hosts:
@@ -95,12 +96,11 @@ def host_not_exists(host):
     # Check the uniqueness of the ip of the new host
     repetedip_host = check_host_exists_by_ip(host["ip"])
     if repetedip_host:
-        print(
+        logger.warning(
             f"Host {host['hostname']} was not created because the ip {host['ip']} already exists in the database in the host {repetedip_host.hostname}."
         )
     else:  # Create the host
         create_host(host)
-        print(f"Host {host['hostname']} created successfully.")
 
 
 # Check if the host already exists in the database by its hostname
@@ -154,7 +154,7 @@ def update_host(host):
     machine.password = host["password"]
 
     db.commit()
-    print(f"Host {host['hostname']} updated successfully.")
+    logger.debug(f"Host {host['hostname']} updated successfully.")
 
 
 # Create a host in the database
@@ -170,6 +170,7 @@ def create_host(host):
     )
     db.add(machine)
     db.commit()
+    logger.debug(f"Host {host['hostname']} created successfully.")
 
 
 # Disable the machines in the database that are not in the hosts.yaml file and enable the machines that are in the hosts.yaml file
@@ -185,10 +186,10 @@ def update_available_machines(hosts):
             if machine.available:
                 machine.available = False
                 db.commit()
-                print(f"Host {machine.hostname} disabled successfully.")
+                logger.critical(f"Host {machine.hostname} disabled successfully.")
         else:
             # If the machine is disabled, enable it
             if not machine.available:
                 machine.available = True
                 db.commit()
-                print(f"Host {machine.hostname} enabled successfully.")
+                logger.critical(f"Host {machine.hostname} enabled successfully.")
