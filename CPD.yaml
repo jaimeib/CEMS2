@@ -1,37 +1,34 @@
 #File with the inital data of the cloud infraestructure
 - groupname: cloudA
-  model: Lenovo
+  brand_model: IBM Power 8
+  management_ip_range: [10.128.1.1, 10.128.1.3] #Primary IP range
+  management_username: admin
+  management_password: admin
   hosts:
       - hostname: cloudA1
-        ip: 10.128.1.1
-        username: root
-        password: root
+        brand_model: IBM Power 9
       - hostname: cloudA2
-        ip: 10.128.1.2
-        username: root
-        password: root
+        management_ip: 10.128.1.5 #Specific IP
+      - hostname: cloudA3
 
-- groupname: cloudB
-  model: IBM
+- groupname: cloudA
+  brand_model: IBM Power 8
+  management_ip_range: [10.128.1.10, 10.128.1.12] #Secondary IP range
+  management_username: admin2
+  management_password: admin2
   hosts:
-      - hostname: cloudB1
-        ip: 10.128.2.1
-        username: root
-        password: root
-      - hostname: cloudB2
-        ip: 10.128.2.2
-        username: root
-        password: root
-# - groupname: cloudC
-#   model: HP
-#   hosts:
-#       - hostname: cloudC1
-#         ip: 10.128.3.1
-#         username: root
-#         password: root
-#       - hostname: cloudC2
-#         ip: 10.128.3.2
-#         username: root
-#         password: root
-# Declarar maquinas hosts de forma manual dentro del grupo o declarar un grupo y los rangos...
-# Siempre que se añada una maquina al fichero debe estar encendida?
+      - hostname: cloudAJ
+      - hostname: cloudAK
+        management_username: admin3
+        management_password: admin3
+      - hostname: cloudAL
+        management_password: otherpass
+# - groupname: cloudB
+#   brand_model: Lenovo
+#   management_ip_range: [10.128.2.20, 10.128.2.22]
+#   management_username: adminLenovo
+#   management_password: passLenovo
+#   hosts: # The hosts are mandatory
+#       - hostname: cloudB1 #Hostname is mandatory
+#       - hostname: cloudB2
+#       - hostname: cloudB3
