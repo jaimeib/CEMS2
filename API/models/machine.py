@@ -13,11 +13,18 @@ class Machines(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     groupname = Column(String(50), nullable=False)
     hostname = Column(String(50), nullable=False, unique=True, index=True)
-    model = Column(String(255), nullable=False)
-    ip = Column(String(16), nullable=False, unique=True)
-    username = Column(String(255), nullable=False)
-    password = Column(String(255), nullable=False)
-    status = Column(Boolean, nullable=False, default=True)
-    available = Column(Boolean, nullable=False, default=True)
+    brand_model = Column(String(255), nullable=False)
+    management_ip = Column(String(16), nullable=False, unique=True)
+    management_username = Column(String(255), nullable=False)
+    management_password = Column(String(255), nullable=False)
+    energy_status = Column(
+        Boolean, nullable=True
+    )  # This is the energy status of the machine (True = ON, False = OFF)
+    monitoring = Column(
+        Boolean, nullable=False, default=False
+    )  # This is the monitoring status of the machine (True = Monitored, False = Unmonitored)
+    available = Column(
+        Boolean, nullable=False, default=True
+    )  # This is the availability status of the machine (True = Available, False = Unavailable)
     created_at = Column(DateTime, default=func.now())
     modified_at = Column(DateTime, default=func.now(), onupdate=func.now())

@@ -8,16 +8,15 @@ from pydantic import BaseModel, Field
 
 class BaseMachine(BaseModel):
     groupname: str = Field(max_length=50)
-    hostname: str = Field(..., min_length=3, max_length=50)
-    model: str = Field(max_length=255)
-    ip: str = Field(
-        ...,
+    hostname: str = Field(min_length=2, max_length=50)
+    brand_model: str = Field(max_length=255)
+    management_ip: str = Field(
         regex="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
     )
-    username: str = Field(max_length=255)
-    password: str = Field(max_length=255)
-    status: bool = True
-    available: bool = True
+    management_username: str = Field(max_length=255)
+    management_password: str = Field(max_length=255)
+    monitoring: bool = False  # By default, the machine is unmonitored
+    available: bool = True  # By default, the machine is available
 
     class Config:
         orm_mode = True  # This is needed to return the model as a dictionary
@@ -25,6 +24,7 @@ class BaseMachine(BaseModel):
 
 class Machine(BaseMachine):
     id: Optional[int]
+    energy_status: Optional[bool]
     created_at: Optional[datetime]
     modified_at: Optional[datetime]
 
