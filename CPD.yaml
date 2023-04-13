@@ -13,17 +13,17 @@
 
 - groupname: cloudA
   brand_model: IBM Power 8
-  management_ip_range: [10.128.1.10, 10.128.1.12] #Secondary IP range
+  management_ip_range: [10.128.1.11, 10.128.1.12] #Secondary IP range
   management_username: admin2
   management_password: admin2
   hosts:
-      - hostname: cloudAJ
+      #- hostname: cloudAJ
       - hostname: cloudAK
         management_username: admin3
         management_password: admin3
       - hostname: cloudAL
         management_password: otherpass
-# - groupname: cloudB
+# - groupname: cloudB #This group is unavailable
 #   brand_model: Lenovo
 #   management_ip_range: [10.128.2.20, 10.128.2.22]
 #   management_username: adminLenovo
