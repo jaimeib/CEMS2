@@ -291,11 +291,15 @@ def update_hosts(hosts):
     while len(pending_hosts) > 0 and possible_update:
         for host in pending_hosts:
             # Check if there is not conflict with the IP of the host now
-            if not check_host_exists_by_ip(host.management_ip):
+            repetedip_host = check_host_exists_by_ip(host.management_ip)
+            if not repetedip_host:
                 update_host(host)
                 pending_hosts.remove(host)
                 possible_update = True
             else:
+                logger.warning(
+                    f"Host {host.hostname} was not updated because the ip {host.management_ip} already exists in the database in the host {repetedip_host.hostname}."
+                )
                 possible_update = False
 
 
@@ -308,9 +312,6 @@ def host_exists(host):
             # Check the uniqueness of the ip of the new host
             repetedip_host = check_host_exists_by_ip(host.management_ip)
             if repetedip_host:
-                logger.warning(
-                    f"Host {host.hostname} was not updated because the ip {host.management_ip} already exists in the database in the host {repetedip_host.hostname}."
-                )
                 # Save the host in the pending_hosts list to update it later
                 pending_hosts.append(host)
             else:  # Update the host
