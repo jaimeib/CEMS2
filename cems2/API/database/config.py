@@ -1,4 +1,6 @@
-# Description: This file contains the configuration for the database connection
+"""
+Configuration for the database connection
+"""
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,8 +16,14 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Create a base class for the models
 Base = declarative_base()
 
-# Create a database session
+
 def get_db():
+    """
+    Create a database session
+
+    Yields:
+        Session: The database session
+    """
     db = SessionLocal()
     try:
         yield db
@@ -23,6 +31,9 @@ def get_db():
         db.close()
 
 
-# Create the database tables
 def create_tables():
+    """
+    Create the database tables
+    """
+
     Base.metadata.create_all(bind=engine)

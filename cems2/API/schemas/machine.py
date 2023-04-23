@@ -1,5 +1,3 @@
-# Description: Machine schema using Pydantic ORM (Object Relational Mapper)
-
 from datetime import datetime
 from typing import Optional
 
@@ -7,6 +5,10 @@ from pydantic import BaseModel, Field
 
 
 class BaseMachine(BaseModel):
+    """
+    Base Machine schema using Pydantic ORM (Object Relational Mapper)
+    """
+
     groupname: str = Field(max_length=50)
     hostname: str = Field(min_length=2, max_length=50)
     brand_model: str = Field(max_length=255)
@@ -23,6 +25,10 @@ class BaseMachine(BaseModel):
 
 
 class Machine(BaseMachine):
+    """
+    Machine schema using Pydantic ORM (Object Relational Mapper)
+    """
+
     id: Optional[int]
     energy_status: Optional[bool]
     created_at: Optional[datetime]

@@ -1,8 +1,6 @@
-# Description: API calls to CRUD operations for the machines table.
-
+import log
 from database.config import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from log import logger
 from models.machine import Machines
 from schemas.machine import BaseMachine, Machine
 from schemas.message import Message
@@ -10,6 +8,9 @@ from sqlalchemy.orm import Session
 
 # Create the machines manager router
 machines = APIRouter()
+
+# Get the LOG
+LOG = log.get_logger(__name__)
 
 # CRUD operations (Only read and update status and monitoring)
 # The rest of the operations and modifications are done through the configuration files
@@ -234,7 +235,7 @@ def update_machine_status(id: str, energy_status: bool, db: Session = Depends(ge
     db.commit()
 
     # Log the machine status update
-    logger.critical(f"Machine with ID: {id} updated: energy status is {energy_status}")
+    LOG.critical(f"Machine with ID: {id} updated: energy status is {energy_status}")
 
     # Return the machine updated
     return machine_model
@@ -291,7 +292,7 @@ def update_machine_status_by_hostname(
     db.commit()
 
     # Log the machine status
-    logger.critical(
+    LOG.critical(
         f"Machine with hostname: {hostname} updated: energy status to {energy_status}"
     )
 
@@ -348,7 +349,7 @@ def update_machine_monitoring(id: str, monitoring: bool, db: Session = Depends(g
     db.commit()
 
     # Log the machine monitoring update
-    logger.warning(f"Machine with ID: {id} monitoring updated to: {monitoring}")
+    LOG.warning(f"Machine with ID: {id} monitoring updated to: {monitoring}")
 
     # Return the machine updated
     return machine_model
@@ -405,7 +406,7 @@ def update_machine_monitoring_by_hostname(
     db.commit()
 
     # Log the machine monitoring update
-    logger.warning(
+    LOG.warning(
         f"Machine with hostname: {hostname} monitoring updated to: {monitoring}"
     )
 

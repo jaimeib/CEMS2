@@ -1,13 +1,14 @@
-# Description: Machine model usign SQLAlchemy ORM (Object Relational Mapper)
-
 from database.config import Base
 from sqlalchemy.schema import Column, Table
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import Boolean, DateTime, Integer, String
 
 
-# Table to store the machines
 class Machines(Base):
+    """
+    Machine model usign SQLAlchemy ORM (Object Relational Mapper)
+    """
+
     __tablename__ = "machines"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

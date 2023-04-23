@@ -1,8 +1,10 @@
 # Description: FastAPI app using the routers from the API/routes folder
 from database.loader import load_hosts
 from fastapi import FastAPI
-from log import logger
+from routes.actions import actions
+from routes.login import login
 from routes.machine import machines
+from routes.monitoring import monitoring
 
 # Create the FastAPI app
 api = FastAPI(
@@ -17,8 +19,17 @@ api = FastAPI(
 # Documentation and tester with Swagger UI: http://localhost:8000/docs
 # Documentation with ReDoc: http://localhost:8000/redoc
 
-# Load the hosts.yaml file into the database
+# Load the initial data .yaml file into the database
 load_hosts()
 
-# Include the machines router
-api.include_router(machines, tags=["Machine Persistence Manager"])
+# Include the login router
+api.include_router(login, tags=["Log In Controller"])
+
+# Include the machines manager router
+api.include_router(machines, tags=["Machine Manager"])
+
+# Include the actions controller router
+api.include_router(actions, tags=["Actions Controller"])
+
+# Include the monitoring controller router
+api.include_router(monitoring, tags=["Monitoring Controller"])
