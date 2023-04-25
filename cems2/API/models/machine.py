@@ -1,3 +1,7 @@
+"""
+Machine model usign SQLAlchemy ORM (Object Relational Mapper)
+"""
+
 from database.config import Base
 from sqlalchemy.schema import Column, Table
 from sqlalchemy.sql import func

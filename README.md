@@ -1,4 +1,4 @@
-# cems2
+# CEMS2
 
 ### _Cloud Computing Energy Efficiency Management Modular Software System_
 

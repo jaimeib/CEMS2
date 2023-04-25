@@ -1,4 +1,7 @@
-# Description: FastAPI app using the routers from the API/routes folder
+"""
+FastAPI app using the routers from the API/routes folder to create the API endpoints for CEMS2
+"""
+
 from database.loader import load_hosts
 from fastapi import FastAPI
 from routes.actions import actions
@@ -8,8 +11,8 @@ from routes.monitoring import monitoring
 
 # Create the FastAPI app
 api = FastAPI(
-    title="Energy Management System API",
-    description="REST API for the Energy Management System",
+    title="CEMS2 REST API",
+    description="REST API for the CEMS2 project",
     version="0.1.0",
 )
 

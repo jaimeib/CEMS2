@@ -1,3 +1,7 @@
+"""
+Machine schemas using Pydantic ORM (Object Relational Mapper)
+"""
+
 from datetime import datetime
 from typing import Optional
 
@@ -21,6 +25,10 @@ class BaseMachine(BaseModel):
     available: bool = True  # By default, the machine is available
 
     class Config:
+        """
+        Config class for the BaseMachine schema as a dictionary
+        """
+
         orm_mode = True  # This is needed to return the model as a dictionary
 
 
@@ -35,4 +43,8 @@ class Machine(BaseMachine):
     modified_at: Optional[datetime]
 
     class Config:
+        """
+        Config class for the BaseMachine schema as a dictionary
+        """
+
         orm_mode = True  # This is needed to return the model as a dictionary

@@ -1,3 +1,7 @@
+"""
+Logging module for CEMS2
+"""
+
 import logging
 
 

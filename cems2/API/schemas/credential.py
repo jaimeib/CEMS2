@@ -1,3 +1,7 @@
+"""
+Log In Credential schema using Pydantic ORM (Object Relational Mapper)
+"""
+
 from pydantic import BaseModel, Field
 
 

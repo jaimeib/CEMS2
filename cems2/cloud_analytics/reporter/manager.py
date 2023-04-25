@@ -1,3 +1,10 @@
+"""
+Reporter Manager module
+"""
+
+from cems2.cloud_analytics import plugin_loader
+
+
 class Manager(object):
     """
     Manager for the Cloud Analytics Reporters
@@ -9,12 +16,12 @@ class Manager(object):
         """
 
         # Get all the reporters available
-        reporters = cloud_analytics.reporter.get_reporters()
+        reporters = plugin_loader.get_reporters()
         self.reporters = reporters
 
-    def report(self, metric_list):
+    def send_metrics(self, metric_list):
         """
-        Report the metrics to the reporters
+        Send the metrics to the reporters
         """
 
-        # Report the metrics to the reporters
+        # For each reporter

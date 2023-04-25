@@ -41,7 +41,7 @@ def get_collectors_names():
     :return: The names of the collectors
     :rtype: frozenset
     """
-    return get_names(COLLECTOR_NAMESPACE)
+    return _get_names(COLLECTOR_NAMESPACE)
 
 
 def get_collectors():
@@ -51,7 +51,7 @@ def get_collectors():
     :return: The collectors
     :rtype: dict
     """
-    return get_extensions(COLLECTOR_NAMESPACE)
+    return _get_extensions(COLLECTOR_NAMESPACE)
 
 
 def get_reporters_names():
@@ -61,7 +61,7 @@ def get_reporters_names():
     :return: The names of the reporters
     :rtype: frozenset
     """
-    return get_names(REPORTER_NAMESPACE)
+    return _get_names(REPORTER_NAMESPACE)
 
 
 def get_reporters():
@@ -71,4 +71,4 @@ def get_reporters():
     :return: The reporters
     :rtype: dict
     """
-    return get_extensions(REPORTER_NAMESPACE)
+    return _get_extensions(REPORTER_NAMESPACE)

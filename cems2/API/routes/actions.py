@@ -1,3 +1,7 @@
+"""
+API endpoints for the actions controller
+"""
+
 import log
 from fastapi import APIRouter, Depends, HTTPException, status
 from schemas.message import Message

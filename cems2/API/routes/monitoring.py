@@ -1,3 +1,7 @@
+"""
+API endpoints for the monitoring controller
+"""
+
 import log
 import requests
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -121,7 +125,7 @@ def get_metrics_by_hostname(hostname: str, metric_name: str = None):
     return metric_list
 
 
-# [ ]: Estado energetico se obtiene a traves de OpenStack o IPMI?
+# TODO: Estado energetico se obtiene a traves de OpenStack o IPMI?
 
 # Internal functions to communicate with the Cloud Analytics Application
 

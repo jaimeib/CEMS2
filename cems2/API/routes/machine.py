@@ -1,3 +1,7 @@
+"""
+API endpoints for the machine manager
+"""
+
 import log
 from database.config import get_db
 from fastapi import APIRouter, Depends, HTTPException, status

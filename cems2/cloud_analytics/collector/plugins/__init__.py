@@ -2,7 +2,7 @@
 Cloud Analytics Collectors 
 """
 
-from cloud_analytics.collector.plugins.openstack_utilization_collector import (
+from cems2.cloud_analytics.collector.plugins.openstack_utilization_collector import (
     OpenStackUtilizationCollector,
 )
 
