@@ -20,6 +20,8 @@ class Manager(object):
         self.collector = None
         self.reporter = None
 
+        self.machines_monitoring = []
+
     def load_managers(self):
         """
         Load the managers required by the cloud_analytics manager
@@ -30,10 +32,8 @@ class Manager(object):
 
     def get_machines_monitoring(self):
         """
-        Get the list of machines to monitor from the API (#FIXME: From the monitoring controller or the Machine Manager)
+        Get the list of machines to monitor from the API
         """
-
-        # TODO: Communication with the API??
 
     def run(self):
         """
@@ -54,9 +54,3 @@ class Manager(object):
 
             # Send the metrics to the reporter manager
             self.reporter.send_metrics(metrics)
-
-        # Comunicate with the API to send the metrics if required
-
-        # TODO: Communication with the API??
-
-        # TODO: Usign API Schemas to validate the data of the metrics o other internal schema?

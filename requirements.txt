@@ -1,7 +1,10 @@
 anyio==3.6.2
+build==0.10.0
+-e git+ssh://git@github.com/jaimeib/TFG-Proyecto.git@369c6a257ca47269172d3f30e348e158fc43e21c#egg=cems2
 certifi==2022.12.7
 charset-normalizer==3.1.0
 click==8.1.3
+configparser==5.3.0
 dnspython==2.3.0
 email-validator==2.0.0.post2
 fastapi==0.95.1
@@ -15,20 +18,23 @@ itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.2
 orjson==3.8.10
+packaging==23.1
 pbr==5.11.1
 pydantic==1.10.7
 PyMySQL==1.0.3
+pyproject_hooks==1.0.0
 python-dotenv==1.0.0
 python-multipart==0.0.6
 PyYAML==6.0
-requests==2.28.2
+requests==2.29.0
 sniffio==1.3.0
-SQLAlchemy==2.0.10
+SQLAlchemy==2.0.11
 starlette==0.26.1
 stevedore==5.0.0
+tomli==2.0.1
 typing_extensions==4.5.0
 ujson==5.7.0
-urllib3==1.26.15
+urllib3==2.0.0
 uvicorn==0.21.1
 uvloop==0.17.0
 watchfiles==0.19.0
