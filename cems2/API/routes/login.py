@@ -2,10 +2,10 @@
 API endpoints for the log in controller
 """
 
-import log
 from fastapi import APIRouter, Depends, HTTPException, status
-from schemas.credential import Credential
-from schemas.message import Message
+
+from cems2 import log
+from cems2.schemas.credential import Credential
 
 # Create the log in controller router
 login = APIRouter()

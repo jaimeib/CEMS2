@@ -2,13 +2,14 @@
 API endpoints for the machine manager
 """
 
-import log
 from database.config import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.machine import Machines
-from schemas.machine import BaseMachine, Machine
-from schemas.message import Message
 from sqlalchemy.orm import Session
+
+from cems2 import log
+from cems2.schemas.machine import BaseMachine, Machine
+from cems2.schemas.message import Message
 
 # Create the machines manager router
 machines = APIRouter()
