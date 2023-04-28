@@ -3,15 +3,15 @@ Module to load the initial data .yaml file into the database
 """
 
 import ipaddress
+from os import path
 
-import log
 import yaml
 from database.config import create_tables, get_db
 from models.machine import Machines
-from schemas.machine import BaseMachine
 from yaml.loader import SafeLoader
 
-FILE = "../../etc/cems2/CPD_IFCA.yaml"  # Path to the initial data .yaml file
+from cems2 import log
+from cems2.schemas.machine import BaseMachine
 
 pending_hosts = []  # List of hosts not updated because the ip already exists previously
 
@@ -19,7 +19,7 @@ pending_hosts = []  # List of hosts not updated because the ip already exists pr
 LOG = log.get_logger(__name__)
 
 
-def load_hosts():
+def load_hosts(datafile):
     """
     Load the initial data .yaml file into the database
     """
@@ -30,7 +30,7 @@ def load_hosts():
     create_tables()
 
     # Obtain the list of groups from the file
-    group_list = _read_groups()
+    group_list = _read_groups(datafile)
 
     # Convert the list of groups to a list of hosts (BaseMachine objects)
     hosts_list = _convert_groups_to_hosts(group_list)
@@ -44,14 +44,14 @@ def load_hosts():
     LOG.info("The hosts.yaml file has been loaded into the database.")
 
 
-def _read_groups():
+def _read_groups(file):
     """
     Read the groups from the file
 
     :return: List of groups
     :rtype: list[dict]
     """
-    with open(FILE, "r") as stream:
+    with open(file, "r") as stream:
         try:
             groups = yaml.load(stream, Loader=SafeLoader)
             return groups
@@ -536,7 +536,7 @@ def _update_host(host):
         setattr(machine, key, value)
 
     db.commit()
-    LOG.debug(f"Host {host.hostname} updated successfully.")
+    LOG.info(f"Host {host.hostname} updated successfully.")
 
 
 def _create_host(host):
@@ -555,7 +555,7 @@ def _create_host(host):
 
     db.add(new_machine_model)
     db.commit()
-    LOG.debug(f"Host {host.hostname} created successfully.")
+    LOG.info(f"Host {host.hostname} created successfully.")
 
 
 def _update_available_machines(hosts):

@@ -9,12 +9,17 @@ from routes.login import login
 from routes.machine import machines
 from routes.monitoring import monitoring
 
+from cems2 import config_loader
+
 # Create the FastAPI app
 api = FastAPI(
     title="CEMS2 REST API",
     description="REST API for the CEMS2 project",
     version="0.1.0",
 )
+
+# Obtain the configuration
+CONFIG = config_loader.config
 
 # Start server with: uvicorn app:app --reload
 # Open browser to: http://localhost:8000/
@@ -23,7 +28,7 @@ api = FastAPI(
 # Documentation with ReDoc: http://localhost:8000/redoc
 
 # Load the initial data .yaml file into the database
-load_hosts()
+load_hosts(CONFIG.get("data", "file"))
 
 # Include the login router
 api.include_router(login, tags=["Log In Controller"])
