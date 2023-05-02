@@ -1,18 +1,15 @@
-"""
-Logging module for CEMS2
-"""
+"""Logging module for CEMS2."""
 
 import logging
-from os import path
 
 from cems2 import config_loader
 
-CONFIG = config_loader.config
+# Get the configuration
+CONFIG = config_loader.get_config()
 
 
 class CustomFormatter(logging.Formatter):
-    """
-    Custom formatter for logging
+    """Custom formatter for logging.
 
     :param logging.Formatter: Logging module
     :type logging.Formatter: logging
@@ -26,8 +23,7 @@ class CustomFormatter(logging.Formatter):
     reset = "\x1b[0m"
 
     def __init__(self, fmt):
-        """
-        Constructor
+        """Initialize the CustomFormatter class.
 
         :param fmt: Format of logs
         :type fmt: str
@@ -43,8 +39,7 @@ class CustomFormatter(logging.Formatter):
         }
 
     def format(self, record):
-        """
-        Format logs
+        """Format logs.
 
         :param record: Record of logs
         :type record: str
@@ -58,8 +53,7 @@ class CustomFormatter(logging.Formatter):
 
 
 def _get_level(level):
-    """
-    Get the loggin level from the config file
+    """Get the loggin level from the config file.
 
     :param level: Log level
     :type level: str
@@ -67,7 +61,6 @@ def _get_level(level):
     :return: Log level
     :rtype: int
     """
-
     if level == "DEBUG":
         return logging.DEBUG
     elif level == "INFO":
@@ -83,10 +76,9 @@ def _get_level(level):
 
 
 def get_logger(name):
-    """
-    Get logger
+    """Get logger.
 
-    :param name: Name of logger
+    :param name: Name of logger.
     :type name: str
 
     :return: Logger
@@ -109,14 +101,14 @@ def get_logger(name):
     # Get the handlers defined in the config file
     handlers = CONFIG.get("log", "handlers")
 
-    # Check if the console handler is defined in the handlers list
+    # Create a handler for logging to stdout if is defined
     if "console" in handlers:
         stdout_handler = logging.StreamHandler()
         stdout_handler.setLevel(_get_level(level))
         stdout_handler.setFormatter(CustomFormatter(fmt))
         logger.addHandler(stdout_handler)
 
-    # Create a handler for logging to a file if the file path is defined in the config file
+    # Create a handler for logging to a file if is defined
     if "file" in handlers and CONFIG.get("log", "file") != "":
         # Get the path of the log file
         log_file = CONFIG.get("log", "file")

@@ -1,6 +1,6 @@
 anyio==3.6.2
 build==0.10.0
--e git+ssh://git@github.com/jaimeib/TFG-Proyecto.git@369c6a257ca47269172d3f30e348e158fc43e21c#egg=cems2
+-e git+ssh://git@github.com/jaimeib/CEMS2.git@369c6a257ca47269172d3f30e348e158fc43e21c#egg=cems2
 certifi==2022.12.7
 charset-normalizer==3.1.0
 click==8.1.3

@@ -1,14 +1,10 @@
-"""
-Metric schema using Pydantic ORM (Object Relational Mapper)
-"""
+"""Metric schema using Pydantic ORM (Object Relational Mapper)."""
 
 from pydantic import BaseModel, Field
 
 
 class Metric(BaseModel):
-    """
-    Metric schema using Pydantic ORM (Object Relational Mapper)
-    """
+    """Metric schema using Pydantic ORM (Object Relational Mapper)."""
 
     name: str = Field(..., example="utilization")
     value: float = Field(..., example=25)
