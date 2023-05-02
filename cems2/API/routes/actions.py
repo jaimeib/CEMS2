@@ -1,6 +1,4 @@
-"""
-API endpoints for the actions controller
-"""
+"""API endpoints for the actions controller."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 

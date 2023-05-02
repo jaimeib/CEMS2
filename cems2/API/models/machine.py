@@ -1,6 +1,4 @@
-"""
-Machine model usign SQLAlchemy ORM (Object Relational Mapper)
-"""
+"""Machine model usign SQLAlchemy ORM (Object Relational Mapper)."""
 
 from database.config import Base
 from sqlalchemy.schema import Column, Table
@@ -9,9 +7,7 @@ from sqlalchemy.sql.sqltypes import Boolean, DateTime, Integer, String
 
 
 class Machines(Base):
-    """
-    Machine model usign SQLAlchemy ORM (Object Relational Mapper)
-    """
+    """Machine model usign SQLAlchemy ORM (Object Relational Mapper)."""
 
     __tablename__ = "machines"
 

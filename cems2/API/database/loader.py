@@ -1,16 +1,13 @@
-"""
-Module to load the initial data .yaml file into the database
-"""
+"""Module to load the initial data .yaml file into the database."""
 
 import ipaddress
-from os import path
 
 import yaml
-from database.config import create_tables, get_db
-from models.machine import Machines
 from yaml.loader import SafeLoader
 
 from cems2 import log
+from cems2.API.database.config import create_tables, get_db
+from cems2.API.models.machine import Machines
 from cems2.schemas.machine import BaseMachine
 
 pending_hosts = []  # List of hosts not updated because the ip already exists previously
@@ -20,10 +17,7 @@ LOG = log.get_logger(__name__)
 
 
 def load_hosts(datafile):
-    """
-    Load the initial data .yaml file into the database
-    """
-
+    """Load the initial data .yaml file into the database."""
     LOG.info("Loading the hosts.yaml file into the database.")
 
     # Create the tables in the database
@@ -45,8 +39,7 @@ def load_hosts(datafile):
 
 
 def _read_groups(file):
-    """
-    Read the groups from the file
+    """Read the groups from the file.
 
     :return: List of groups
     :rtype: list[dict]
@@ -60,8 +53,7 @@ def _read_groups(file):
 
 
 def _convert_groups_to_hosts(groups):
-    """
-    Convert the list of groups to a list of machines (BaseMachine)
+    """Convert the list of groups to a list of machines (BaseMachine).
 
     :param groups: List of groups
     :type groups: list[dict]
@@ -69,7 +61,6 @@ def _convert_groups_to_hosts(groups):
     :return: List of hosts
     :rtype: list[BaseMachine]
     """
-
     # List of hosts obtained from the groups
     hosts_obtained_from_group = []
 
@@ -82,7 +73,7 @@ def _convert_groups_to_hosts(groups):
             for host in group["hosts"]:  # For each particular host
                 _find_particular_atributtes(new_group_list, host)
 
-        # If the group has been created correctly, add it to the list of groups (Not empty)
+        # If the group has been created correctly, add it to the list of groups
         if new_group_list:
             hosts_obtained_from_group.append(new_group_list)
 
@@ -98,8 +89,7 @@ def _convert_groups_to_hosts(groups):
 
 
 def _create_hosts_list(group):
-    """
-    Create a list of hosts from a group
+    """Create a list of hosts from a group.
 
     :param group: Group
     :type group: dict
@@ -107,7 +97,6 @@ def _create_hosts_list(group):
     :return: List of hosts
     :rtype: list[BaseMachine]
     """
-
     # Check for consistency of the hostname and the groupname
     if not _check_hostname_consistency(group):
         return []  # Return an empty list
@@ -179,8 +168,7 @@ def _create_hosts_list(group):
 
 
 def _check_hostname_consistency(group):
-    """
-    Check if the hostname is consistent with the groupname
+    """Check if the hostname is consistent with the groupname.
 
     :param group: Group with the hosts to check the consistency of the hostname
     :type group: dict
@@ -188,7 +176,6 @@ def _check_hostname_consistency(group):
     :return: True if the hostname is consistent with the groupname, False otherwise
     :rtype: bool
     """
-
     if (group["hostname_range"][0])[: len(group["groupname"])] != group["groupname"]:
         LOG.error(
             f"The hostname of the group {group['groupname']} is not consistent with the groupname."
@@ -199,8 +186,7 @@ def _check_hostname_consistency(group):
 
 
 def _check_number_of_hosts_and_ips(group):
-    """
-    Check if the number of hosts is equal to the number of IPs
+    """Check if the number of hosts is equal to the number of IPs.
 
     :param group: Group to check the number of hosts and IPs
     :type group: dict
@@ -208,7 +194,6 @@ def _check_number_of_hosts_and_ips(group):
     :return: True if the number of hosts is equal to the number of IPs, False otherwise
     :rtype: bool
     """
-
     # If there is only one host, check that there is only one IP
     if len(group["hostname_range"]) == 1 and len(group["management_ip_range"]) != 1:
         LOG.error(
@@ -254,8 +239,7 @@ def _check_number_of_hosts_and_ips(group):
 
 
 def _find_particular_atributtes(hosts, host):
-    """
-    Find the particular atributtes of a host and add them to the host
+    """Find the particular atributtes of a host and add them to the host.
 
     :param hosts: List of hosts
     :type hosts: list
@@ -263,7 +247,6 @@ def _find_particular_atributtes(hosts, host):
     :param host: Host to find the particular atributtes
     :type host: dict
     """
-
     # If the host has a particular brand_model, add it to the host
     if "brand_model" in host:
         _update_brand_model(hosts, host)
@@ -279,8 +262,7 @@ def _find_particular_atributtes(hosts, host):
 
 
 def _update_brand_model(hosts, host):
-    """
-    Update the brand_model of the host
+    """Update the brand_model of the host.
 
     :param hosts: List of hosts
     :type hosts: list
@@ -301,8 +283,7 @@ def _update_brand_model(hosts, host):
 
 
 def _update_management_ip(hosts, host):
-    """
-    Update the management_ip of the host
+    """Update the management_ip of the host.
 
     :param hosts: List of hosts
     :type hosts: list
@@ -324,8 +305,7 @@ def _update_management_ip(hosts, host):
 
 
 def _update_management_username(hosts, host):
-    """
-    Update the management_username of the host
+    """Update the management_username of the host.
 
     :param hosts: List of hosts
     :type hosts: list
@@ -347,8 +327,7 @@ def _update_management_username(hosts, host):
 
 
 def _update_management_password(hosts, host):
-    """
-    Update the management_password of the host
+    """Update the management_password of the host.
 
     :param hosts: List of hosts
     :type hosts: list
@@ -370,8 +349,7 @@ def _update_management_password(hosts, host):
 
 
 def _update_hosts(hosts):
-    """
-    Update the hosts into the database
+    """Update the hosts into the database.
 
     :param hosts: List of hosts
     :type hosts: list(BaseMachine)
@@ -401,8 +379,7 @@ def _update_hosts(hosts):
 
 
 def _host_exists(host):
-    """
-    Actions to perform if the host already exists in the database
+    """Actions to perform if the host already exists in the database.
 
     :param host: Host to update
     :type host: BaseMachine
@@ -425,8 +402,7 @@ def _host_exists(host):
 
 
 def _host_not_exists(host):
-    """
-    Actions to perform if the host not exists in the database
+    """Actions to perform if the host not exists in the database.
 
     :param host: Host to create
     :type host: BaseMachine
@@ -442,8 +418,7 @@ def _host_not_exists(host):
 
 
 def _check_host_exists_by_hostname(hostname):
-    """
-    Check if the host already exists in the database by its hostname
+    """Check if the host already exists in the database by its hostname.
 
     :param hostname: Hostname of the host
     :type hostname: str
@@ -456,8 +431,7 @@ def _check_host_exists_by_hostname(hostname):
 
 
 def _check_host_data_changed(host):
-    """
-    Check if the host data has changed
+    """Check if the host data has changed.
 
     :param host: Host to check
     :type host: BaseMachine
@@ -465,7 +439,6 @@ def _check_host_data_changed(host):
     :return: True if the data has changed, False if the data has not changed
     :rtype: bool
     """
-
     db = next(get_db())
     machine = db.query(Machines).filter(Machines.hostname == host.hostname).first()
 
@@ -486,8 +459,7 @@ def _check_host_data_changed(host):
 
 
 def _check_host_ip_changed(host):
-    """
-    Check if the host ip has changed
+    """Check if the host ip has changed.
 
     :param host: Host to check
     :type host: BaseMachine
@@ -508,8 +480,7 @@ def _check_host_ip_changed(host):
 
 
 def _check_host_exists_by_ip(management_ip):
-    """
-    Check if the host already exists in the database by its ip
+    """Check if the host already exists in the database by its ip.
 
     :param management_ip: IP of the host
     :type management_ip: str
@@ -522,8 +493,7 @@ def _check_host_exists_by_ip(management_ip):
 
 
 def _update_host(host):
-    """
-    Update the host in the database
+    """Update the host in the database.
 
     :param host: Host to update
     :type host: BaseMachine
@@ -540,8 +510,7 @@ def _update_host(host):
 
 
 def _create_host(host):
-    """
-    Create a host in the database
+    """Create a host in the database.
 
     :param host: Host to create
     :type host: BaseMachine
@@ -559,8 +528,7 @@ def _create_host(host):
 
 
 def _update_available_machines(hosts):
-    """
-    Update the availability of the machines in the database
+    """Update the availability of the machines in the database.
 
     :param hosts: List of hosts
     :type hosts: List[BaseMachine]

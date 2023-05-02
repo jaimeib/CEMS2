@@ -1,6 +1,4 @@
-"""
-FastAPI app using the routers from the API/routes folder to create the API endpoints for CEMS2
-"""
+"""API endpoints for CEMS2."""
 
 from database.loader import load_hosts
 from fastapi import FastAPI

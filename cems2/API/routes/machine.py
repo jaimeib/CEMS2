@@ -1,14 +1,14 @@
-"""
-API endpoints for the machine manager
-"""
+"""API endpoints for the machine manager."""
 
-from database.config import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from models.machine import Machines
 from sqlalchemy.orm import Session
 
 from cems2 import log
-from cems2.schemas.machine import BaseMachine, Machine
+from cems2.API.database.config import get_db
+from cems2.API.models.machine import Machines
+from cems2.API.routes import actions as actions_controller
+from cems2.API.routes import monitoring as monitoring_controller
+from cems2.schemas.machine import Machine
 from cems2.schemas.message import Message
 
 # Create the machines manager router
@@ -20,26 +20,24 @@ LOG = log.get_logger(__name__)
 # CRUD operations (Only read and update status and monitoring)
 # The rest of the operations and modifications are done through the configuration files
 
-# READ
+# API ENDPOINTS
 
 
-# Get all the machines (with optional filter by group)
 @machines.get(
     "/machines",
     response_model=list[Machine],
     status_code=status.HTTP_200_OK,
     summary="Get all the machines",
 )
-def get_machines(
+def _get_machines(
     group_name: str = None,
     brand_model: str = None,
     energy_status: bool = None,
     monitoring: bool = None,
     available: bool = None,
-    db: Session = Depends(get_db),
+    db_session: Session = Depends(get_db),
 ):
-    """
-    Get all the machines from the database with the following data:
+    """Get all the machines from the database with the following data:
 
     - **id**: The ID of the machine
     - **groupname**: The group name of the machine
@@ -63,14 +61,13 @@ def get_machines(
     - **monitoring**: True if the machine is being monitored, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise
     """
-
     # Get the machines from the database
-    machines_model = db.query(Machines).all()
+    machines_model = db_session.query(Machines).all()
 
     # Filter by group
     if group_name is not None:
         machines_model = [
-            machine for machine in machines_model if machine.groupname == group
+            machine for machine in machines_model if machine.groupname == group_name
         ]
 
     # Filter by brand_model
@@ -100,7 +97,6 @@ def get_machines(
     return machines_model
 
 
-# Get a machine by its ID
 @machines.get(
     "/machines/id={id}",
     response_model=Machine,
@@ -108,9 +104,8 @@ def get_machines(
     summary="Get a machine by its ID",
     responses={404: {"description": "Machine not found by ID", "model": Message}},
 )
-def get_machine_by_id(id: int, db: Session = Depends(get_db)):
-    """
-    Get a machine from the database by its ID with the following data:
+def _get_machine_by_id(id: int, db_session: Session = Depends(get_db)):
+    """Get a machine from the database by its ID with the following data:
 
     - **id**: The ID of the machine
     - **groupname**: The group name of the machine
@@ -129,9 +124,8 @@ def get_machine_by_id(id: int, db: Session = Depends(get_db)):
 
     **Returns:** The machine
     """
-
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.id == id).first()
+    machine_model = db_session.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
@@ -144,7 +138,6 @@ def get_machine_by_id(id: int, db: Session = Depends(get_db)):
     return machine_model
 
 
-# Get a machine by hostname
 @machines.get(
     "/machines/hostname={hostname}",
     response_model=Machine,
@@ -152,9 +145,8 @@ def get_machine_by_id(id: int, db: Session = Depends(get_db)):
     summary="Get a machine by its hostname",
     responses={404: {"description": "Machine not found by hostname", "model": Message}},
 )
-def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
-    """
-    Get a machine from the database by its hostname with the following data:
+def _get_machine_by_hostname(hostname: str, db_session: Session = Depends(get_db)):
+    """Get a machine from the database by its hostname with the following data:
 
     - **id**: The ID of the machine
     - **groupname**: The group name of the machine
@@ -173,9 +165,10 @@ def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
 
     **Returns:** The machine
     """
-
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.hostname == hostname).first()
+    machine_model = (
+        db_session.query(Machines).filter(Machines.hostname == hostname).first()
+    )
 
     # Check if the machine exists
     if machine_model is None:
@@ -188,10 +181,6 @@ def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
     return machine_model
 
 
-# UPDATE
-
-
-# Patch machine status by id
 @machines.patch(
     "/machines/id={id}/status",
     response_model=Machine,
@@ -205,9 +194,10 @@ def get_machine_by_hostname(hostname: str, db: Session = Depends(get_db)):
         },
     },
 )
-def update_machine_status(id: str, energy_status: bool, db: Session = Depends(get_db)):
-    """
-    Update a machine energy status by its ID
+def _update_machine_status(
+    id: str, energy_status: bool, db_session: Session = Depends(get_db)
+):
+    """Update a machine energy status by its ID.
 
     **Raises:**
     - **HTTPException: 404**: If the machine does not exist by its ID
@@ -215,9 +205,8 @@ def update_machine_status(id: str, energy_status: bool, db: Session = Depends(ge
 
     **Returns:** The updated machine
     """
-
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.id == id).first()
+    machine_model = db_session.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
@@ -225,6 +214,10 @@ def update_machine_status(id: str, energy_status: bool, db: Session = Depends(ge
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Machine with ID: {id} not found",
         )
+
+    # Check if there is not change in the energy status
+    if machine_model.energy_status == energy_status:
+        return machine_model
 
     # Check if the machine is available and being monitored to update the energy status
     if machine_model.available and machine_model.monitoring:
@@ -236,8 +229,8 @@ def update_machine_status(id: str, energy_status: bool, db: Session = Depends(ge
         )
 
     # Update the machine in the database
-    db.add(machine_model)
-    db.commit()
+    db_session.add(machine_model)
+    db_session.commit()
 
     # Log the machine status update
     LOG.critical(f"Machine with ID: {id} updated: energy status is {energy_status}")
@@ -246,7 +239,6 @@ def update_machine_status(id: str, energy_status: bool, db: Session = Depends(ge
     return machine_model
 
 
-# Patch machine status by hostname
 @machines.patch(
     "/machines/hostname={hostname}/status",
     response_model=Machine,
@@ -260,11 +252,10 @@ def update_machine_status(id: str, energy_status: bool, db: Session = Depends(ge
         },
     },
 )
-def update_machine_status_by_hostname(
-    hostname: str, energy_status: bool, db: Session = Depends(get_db)
+def _update_machine_status_by_hostname(
+    hostname: str, energy_status: bool, db_session: Session = Depends(get_db)
 ):
-    """
-    Update a machine energy status by its hostname
+    """Update a machine energy status by its hostname.
 
     **Raises:**
     - HTTPException: 404 - If the machine does not exist by hostname
@@ -272,9 +263,10 @@ def update_machine_status_by_hostname(
 
     **Returns:** The updated machine
     """
-
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.hostname == hostname).first()
+    machine_model = (
+        db_session.query(Machines).filter(Machines.hostname == hostname).first()
+    )
 
     # Check if the machine exists
     if machine_model is None:
@@ -282,6 +274,10 @@ def update_machine_status_by_hostname(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Machine with hostname: {hostname} not found",
         )
+
+    # Check if there is not change in the energy status
+    if machine_model.energy_status == energy_status:
+        return machine_model
 
     # Check if the machine is available and being monitored to update the status
     if machine_model.available and machine_model.monitoring:
@@ -293,8 +289,8 @@ def update_machine_status_by_hostname(
         )
 
     # Update the machine in the database
-    db.add(machine_model)
-    db.commit()
+    db_session.add(machine_model)
+    db_session.commit()
 
     # Log the machine status
     LOG.critical(
@@ -305,7 +301,6 @@ def update_machine_status_by_hostname(
     return machine_model
 
 
-# Patch machine monitoring by id
 @machines.patch(
     "/machines/id={id}/monitoring",
     response_model=Machine,
@@ -319,9 +314,10 @@ def update_machine_status_by_hostname(
         },
     },
 )
-def update_machine_monitoring(id: str, monitoring: bool, db: Session = Depends(get_db)):
-    """
-    Update if the machine has to be monitored or not in the system by its ID
+def _update_machine_monitoring(
+    id: str, monitoring: bool, db_session: Session = Depends(get_db)
+):
+    """Update if the machine has to be monitored or not in the system by its ID.
 
     **Raises:**
     - **HTTPException: 404**: - If the machine does not exist by its ID
@@ -329,9 +325,8 @@ def update_machine_monitoring(id: str, monitoring: bool, db: Session = Depends(g
 
     **Returns:** The updated machine
     """
-
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.id == id).first()
+    machine_model = db_session.query(Machines).filter(Machines.id == id).first()
 
     # Check if the machine exists
     if machine_model is None:
@@ -339,6 +334,10 @@ def update_machine_monitoring(id: str, monitoring: bool, db: Session = Depends(g
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Machine with ID: {id} not found",
         )
+
+    # Check if the machine is not being updated
+    if machine_model.monitoring == monitoring:
+        return machine_model
 
     # Check if the machine is available to update the monitoring
     if machine_model.available:
@@ -350,17 +349,19 @@ def update_machine_monitoring(id: str, monitoring: bool, db: Session = Depends(g
         )
 
     # Update the machine in the database
-    db.add(machine_model)
-    db.commit()
+    db_session.add(machine_model)
+    db_session.commit()
 
     # Log the machine monitoring update
     LOG.warning(f"Machine with ID: {id} monitoring updated to: {monitoring}")
+
+    # Notify the machine monitoring update to the monitoring controller
+    monitoring_controller.notify_update_monitoring()
 
     # Return the machine updated
     return machine_model
 
 
-# Patch machine monitoring by hostname
 @machines.patch(
     "/machines/hostname={hostname}/monitoring",
     response_model=Machine,
@@ -374,11 +375,10 @@ def update_machine_monitoring(id: str, monitoring: bool, db: Session = Depends(g
         },
     },
 )
-def update_machine_monitoring_by_hostname(
-    hostname: str, monitoring: bool, db: Session = Depends(get_db)
+def _update_machine_monitoring_by_hostname(
+    hostname: str, monitoring: bool, db_session: Session = Depends(get_db)
 ):
-    """
-    Update if the machine has to be monitored or not in the system by its hostname
+    """Update if the machine has to be monitored or not in the system by its hostname.
 
     **Raises:**
     - **HTTPException: 404**: - If the machine does not exist by hostname
@@ -386,9 +386,10 @@ def update_machine_monitoring_by_hostname(
 
     **Returns:** The updated machine
     """
-
     # Get the machine from the database
-    machine_model = db.query(Machines).filter(Machines.hostname == hostname).first()
+    machine_model = (
+        db_session.query(Machines).filter(Machines.hostname == hostname).first()
+    )
 
     # Check if the machine exists
     if machine_model is None:
@@ -397,23 +398,74 @@ def update_machine_monitoring_by_hostname(
             detail=f"Machine with hostname: {hostname} not found",
         )
 
+    # Check if the machine is not being updated
+    if machine_model.monitoring == monitoring:
+        return machine_model
+
     # Check if the machine is available to update the monitoring
     if machine_model.available:
         machine_model.monitoring = monitoring
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Machine with ID: {id} not updated: is not available ",
+            detail=f"Machine with ID: {id} not updated: is not available",
         )
 
     # Update the machine in the database
-    db.add(machine_model)
-    db.commit()
+    db_session.add(machine_model)
+    db_session.commit()
 
     # Log the machine monitoring update
     LOG.warning(
         f"Machine with hostname: {hostname} monitoring updated to: {monitoring}"
     )
 
+    # Notify the machine monitoring update to the monitoring controller
+    monitoring_controller.notify_update_monitoring()
+
     # Return the machine updated
     return machine_model
+
+
+# INTERNAL METHODS
+def get_machines(
+    group_name: str = None,
+    brand_model: str = None,
+    energy_status: bool = None,
+    monitoring: bool = None,
+    available: bool = None,
+):
+    """Get the machines from the database.
+
+    :param group_name: The group name of the machines
+    :type group_name: str
+
+    :param brand_model: The brand model of the machines
+    :type brand_model: str
+
+    :param energy_status: The energy status of the machines
+    :type energy_status: bool
+
+    :param monitoring: The monitoring status of the machines
+    :type monitoring: bool
+
+    :param available: The availability status of the machines
+    :type available: bool
+
+    :return: The machines
+    :rtype: list[Machine (Model)]
+    """
+    try:
+        machine_list = _get_machines(
+            group_name=group_name,
+            brand_model=brand_model,
+            energy_status=energy_status,
+            monitoring=monitoring,
+            available=available,
+            db_session=next(get_db()),
+        )
+    except Exception as e:
+        LOG.error(f"Error getting the machines: {e}")
+        exit(1)
+
+    return machine_list

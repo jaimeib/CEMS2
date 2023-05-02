@@ -1,6 +1,4 @@
-"""
-Configuration for the database connection
-"""
+"""Configuration for the database connection."""
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -8,8 +6,8 @@ from sqlalchemy.orm import sessionmaker
 
 from cems2 import config_loader
 
-# Get the config file
-CONFIG = config_loader.config
+# Get the configuration
+CONFIG = config_loader.get_config()
 
 # Get the database configuration from the config file
 user = CONFIG.get("database", "user")
@@ -30,11 +28,10 @@ Base = declarative_base()
 
 
 def get_db():
-    """
-    Create a database session
+    """Create a database session.
 
-    Yields:
-        Session: The database session
+    :return: Database session
+    :rtype: SessionLocal
     """
     db = SessionLocal()
     try:
@@ -44,8 +41,5 @@ def get_db():
 
 
 def create_tables():
-    """
-    Create the database tables
-    """
-
+    """Create the database tables."""
     Base.metadata.create_all(bind=engine)

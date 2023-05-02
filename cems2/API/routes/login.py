@@ -1,6 +1,4 @@
-"""
-API endpoints for the log in controller
-"""
+"""API endpoints for the log in controller."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -20,10 +18,8 @@ LOG = log.get_logger(__name__)
     summary="Validates the user credentials usign the OpenStack Keystone API",
     status_code=status.HTTP_200_OK,
 )
-def user_login(credentials: Credential):
-    """
-    Validates the user credentials usign the OpenStack Keystone API
-    """
+def _user_login(credentials: Credential):
+    """Validates the user credentials usign the OpenStack Keystone API."""
 
     LOG.debug("Validating the user credentials")
 
@@ -41,7 +37,5 @@ def user_login(credentials: Credential):
 
 # Logout the user
 @login.post("/logout", summary="Logout the user", status_code=status.HTTP_200_OK)
-def user_logout():
-    """
-    Logout the user
-    """
+def _user_logout():
+    """Logout the user."""
