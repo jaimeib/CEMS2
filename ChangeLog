@@ -1,0 +1,32 @@
+CHANGES
+=======
+
+* Cloud Analytics plugins loaded using Stevedore
+* Update doc usign tox testing
+* Reorganize API endpoints + added functions to communicate with other components
+* Added base structure of machines\_control
+* Update README.md
+* Update requirements.txt
+* Deleted files from the API (now external)
+* Fixed imports usign external log and external schemas in the API
+* Added support to use de config file params
+* Moved log+schemas out of API package (shared system-wide)
+* Added config parsing from config file
+* Modify project name + general fixes importing modules
+* Added base structure for python packages
+* structured as a python package
+* Improve log on loader.py and machine manager API
+* Update: simpler loader.py + range with hostname + without crashed
+* Added different cases
+* Updated machine API (New fields)
+* Updated requirements.txt
+* Added IP ranges to loader.py + General Improvements
+* Added logger
+* Added init data loader
+* Update Machine API
+* Update settings doc
+* Added documentation + improve schemas
+* Added Settings CRUD basic API
+* Added Machine CRUD basic API
+* Update README.md
+* Initial commit

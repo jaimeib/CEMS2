@@ -1,15 +1,15 @@
-"""
-Module for loading configuration files into the system. 
-"""
+"""Module for loading configuration files into the system."""
+
 
 import os
 from configparser import ConfigParser
 
-path_current_directory = os.path.dirname(__file__)
-path_config_file = os.path.join(
-    path_current_directory, "../etc/cems2/", "cems2.conf"
-)  # FIXME: Path is relative
+config_file_path = os.path.join(os.path.dirname(__file__), "config.ini")
+
+config = ConfigParser(converters={"list": lambda x: [i.strip() for i in x.split(",")]})
+config.read(config_file_path)
 
 
-config = ConfigParser()
-config.read(path_config_file)
+def get_config():
+    """Get the configuration."""
+    return config

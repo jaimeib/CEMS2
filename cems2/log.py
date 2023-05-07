@@ -99,7 +99,7 @@ def get_logger(name):
     fmt = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 
     # Get the handlers defined in the config file
-    handlers = CONFIG.get("log", "handlers")
+    handlers = CONFIG.getlist("log", "handlers")
 
     # Create a handler for logging to stdout if is defined
     if "console" in handlers:
