@@ -1,9 +1,10 @@
 """Machine model usign SQLAlchemy ORM (Object Relational Mapper)."""
 
-from database.config import Base
 from sqlalchemy.schema import Column, Table
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import Boolean, DateTime, Integer, String
+
+from cems2.API.database.config import Base
 
 
 class Machines(Base):

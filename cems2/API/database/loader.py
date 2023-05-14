@@ -543,6 +543,8 @@ def _update_available_machines(hosts):
             # If the machine is enabled, disable it
             if machine.available:
                 machine.available = False
+                # Also disable the monitoring flag of the machine (because it is not available)
+                machine.monitoring = False
                 db.commit()
                 LOG.critical(f"Host {machine.hostname} is not available now.")
         else:

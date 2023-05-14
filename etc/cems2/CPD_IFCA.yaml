@@ -13,12 +13,12 @@
         management_username: admin2
         management_password: admin2
 
-- groupname: cloudA
-  brand_model: IBM Power 8
-  hostname_range: [cloudA011] #Only one host
-  management_ip_range: [10.128.1.11] #Only one host
-  management_username: admin
-  management_password: admin
+# - groupname: cloudA
+#   brand_model: IBM Power 8
+#   hostname_range: [cloudA011] #Only one host
+#   management_ip_range: [10.128.1.11] #Only one host
+#   management_username: admin
+#   management_password: admin
 
 - groupname: cloudA
   brand_model: IBM Power 8
