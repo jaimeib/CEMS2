@@ -3,11 +3,12 @@
 from fastapi import APIRouter, HTTPException, status
 
 from cems2 import log
+from cems2.__main__ import cloud_analytics_manager, machines_control_manager
 from cems2.API.routes import machine as machine_manager
-from cems2.cloud_analytics.manager import Manager as CloudAnalyticsManager
 from cems2.schemas.machine import Machine
 from cems2.schemas.message import Message
 from cems2.schemas.metric import Metric
+from cems2.schemas.plugin import Plugin
 
 # Create the monitoring controller router
 monitoring = APIRouter()
@@ -101,7 +102,27 @@ def _get_metrics_by_hostname(hostname: str, metric_name: str = None):
     return metric_list
 
 
-# INTERNAL METHODS
+@monitoring.get(
+    "/monitoring/plugins={plugin_type}",
+    summary="Get the plugins installed by type (Collector or Reporter)",
+    status_code=status.HTTP_200_OK,
+    response_model=list[Plugin],
+)
+def _get_plugins(plugin_type: str):
+    """
+    Get the plugins installed by type (Collector or Reporter).
+
+    **Returns**: A list of plugins
+    """
+    plugin_list = cloud_analytics_manager.get_plugins(plugin_type)
+
+    if not plugin_list:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No plugins found",
+        )
+
+    return plugin_list
 
 
 def machines_on_monitoring():
@@ -128,5 +149,4 @@ def machines_on_monitoring():
 
 def notify_update_monitoring():
     """Notify to the CloudAnalyticsManager a machine update."""
-
-    CloudAnalyticsManager().update_machines_monitoring()
+    cloud_analytics_manager.set_machines(machines_on_monitoring())

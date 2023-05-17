@@ -45,10 +45,18 @@ class Manager(object):
 
         # For each collector
         for collector_name, collector_cls in self.collectors:
-            # Get the metrics
-            metrics = collector_cls().collect_metric(machine_id)
+            # Get the metric for each collector
+            metric = collector_cls().collect_metric(machine_id)
 
-            # Add the metrics to the list
-            metric_list.extend(metrics)
+            # Add the metric to the list
+            metric_list.append(metric)
 
         return metric_list
+
+    def get_installed_plugins(self):
+        """Get the list of installed collectors.
+
+        :return: The list of installed collectors
+        :rtype: list[str]
+        """
+        return plugin_loader.get_collectors_names()

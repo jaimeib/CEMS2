@@ -42,3 +42,11 @@ class Manager(object):
         for reporter_name, reporter_cls in self.reporters:
             # Send the metrics
             reporter_cls().report_metric(metric_list)
+
+    def get_installed_plugins(self):
+        """Get the list of installed reporters.
+
+        :return: The list of installed reporters
+        :rtype: list[str]
+        """
+        return plugin_loader.get_reporters_names()

@@ -1,7 +1,8 @@
 CHANGES
 =======
 
-* Cloud Analytics plugins loaded using Stevedore
+* Disable monitoring flag when disable a machine in the file
+* Cloud Analytics + Machines Control Plugin system with Stevedore completed
 * Update doc usign tox testing
 * Reorganize API endpoints + added functions to communicate with other components
 * Added base structure of machines\_control

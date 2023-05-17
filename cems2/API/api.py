@@ -1,13 +1,23 @@
 """API endpoints for CEMS2."""
 
-from database.loader import load_hosts
+# Start server with: uvicorn app:app --reload
+# Open browser to: http://localhost:8000/
+
+# Documentation and tester with Swagger UI: http://localhost:8000/docs
+# Documentation with ReDoc: http://localhost:8000/redoc
+
+
 from fastapi import FastAPI
-from routes.actions import actions
-from routes.login import login
-from routes.machine import machines
-from routes.monitoring import monitoring
 
 from cems2 import config_loader
+from cems2.API.database.loader import load_hosts
+from cems2.API.routes.actions import actions
+from cems2.API.routes.login import login
+from cems2.API.routes.machine import machines
+from cems2.API.routes.monitoring import monitoring
+
+# Obtain the configuration
+CONFIG = config_loader.get_config()
 
 # Create the FastAPI app
 api = FastAPI(
@@ -15,15 +25,6 @@ api = FastAPI(
     description="REST API for the CEMS2 project",
     version="0.1.0",
 )
-
-# Obtain the configuration
-CONFIG = config_loader.config
-
-# Start server with: uvicorn app:app --reload
-# Open browser to: http://localhost:8000/
-
-# Documentation and tester with Swagger UI: http://localhost:8000/docs
-# Documentation with ReDoc: http://localhost:8000/redoc
 
 # Load the initial data .yaml file into the database
 load_hosts(CONFIG.get("data", "file"))

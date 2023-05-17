@@ -6,6 +6,7 @@ import cems2.cloud_analytics.collector.manager as collector_manager
 import cems2.cloud_analytics.reporter.manager as reporter_manager
 from cems2 import config_loader, log
 from cems2.schemas.machine import Machine  # TODO: To test
+from cems2.schemas.plugin import Plugin
 
 # Get the logger
 LOG = log.get_logger(__name__)
@@ -28,17 +29,7 @@ class Manager(object):
         self.reporter = None
 
         # List of machines to monitor
-        self.machines_monitoring = [
-            Machine(
-                groupname="all",
-                hostname="all1",
-                id=1,
-                management_ip="192.168.56.107",
-                management_username="ubuntu",
-                brand_model="HP ProLiant DL360 Gen10",
-                management_password="ubuntu",
-            )
-        ]
+        self.machines_monitoring = []
 
         # Dictionary to store the last metrics of each machine
         # (key: hostname, value: list of metrics)
@@ -59,7 +50,7 @@ class Manager(object):
         :type machines_list: list[Machine]
         """
 
-        self.machines_monitoring.append(machines_list)
+        self.machines_monitoring = machines_list.copy()
         LOG.info(
             "Machines to monitor: %s", [machine.hostname for machine in machines_list]
         )
@@ -84,19 +75,18 @@ class Manager(object):
 
         # Run periodically as the monitoring interval
         while True:
+            # Wait the monitoring interval
+            LOG.debug("Waiting %s seconds", self.monitoring_interval)
+            time.sleep(self.monitoring_interval)
+
             # For each machine to monitor
             for machine in self.machines_monitoring:
                 # Get the metrics from the collector manager
                 self.metrics[machine.hostname] = self.collector.get_metrics(
                     machine.hostname
                 )
-
                 # Send the metrics to the reporter manager
                 self.reporter.send_metrics(self.metrics[machine.hostname])
-
-            # Wait the monitoring interval
-            LOG.debug("Waiting %s seconds", self.monitoring_interval)
-            time.sleep(self.monitoring_interval)
 
     # Communication with de API monitoring controller
     def obtain_last_metrics(self):
@@ -106,3 +96,27 @@ class Manager(object):
         :rtype: dict{key: hostname, value: list[Metric]}
         """
         return self.metrics
+
+    def get_plugins(self, plugin_type: str):
+        """Obtain the installed plugins.
+
+        :return: list of installed plugins
+        :rtype: list[Plugin]
+        """
+        plugins = []
+        if plugin_type == "collector":
+            # Create a list of plugins with the name and type of each plugin
+            plugins = [
+                Plugin(name=plugin, type=plugin_type)
+                for plugin in self.collector.get_installed_plugins()
+            ]
+        elif plugin_type == "reporter":
+            # Create a list of plugins with the name and type of each plugin
+            plugins = [
+                Plugin(name=plugin, type=plugin_type)
+                for plugin in self.reporter.get_installed_plugins()
+            ]
+        else:
+            plugins = None
+
+        return plugins
