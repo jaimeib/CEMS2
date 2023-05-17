@@ -9,3 +9,7 @@ class PMOptimizationBase(metaclass=ABCMeta):
     @abstractmethod
     def __init__(self):
         """."""
+
+    @abstractmethod
+    def optimize(self, pm_list):
+        """Optimize the physical machines."""

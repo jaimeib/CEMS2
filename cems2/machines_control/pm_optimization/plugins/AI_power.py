@@ -12,3 +12,12 @@ class AIPower(PMConnectorBase):
 
     def __init__(self):
         """Initialize the list of machines to be turned on or off."""
+
+    def optimize(self, pm_list):
+        """Optimize the physical machines.
+
+        :param pm_list: list of physical machines
+        :type pm_list: list
+
+        """
+        LOG.info("Optimizing the physical machines")

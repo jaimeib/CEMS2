@@ -33,3 +33,5 @@ class Manager(object):
         ]
         self.pm_connectors = pm_connectors
         LOG.debug("Physical Machines Connectors loaded: %s", pm_connectors_list)
+
+    # TODO: Apagados y encendidos de máquinas dinamicos -> Como se decide que conectores se usan?
