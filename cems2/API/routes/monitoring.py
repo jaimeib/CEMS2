@@ -20,7 +20,7 @@ LOG = log.get_logger(__name__)
 
 
 @monitoring.get(
-    "/metrics",
+    "/monitoring/metrics",
     summary="Get the lastest metrics from the cloud analytics application",
     status_code=status.HTTP_200_OK,
     response_model=list[Metric],
@@ -47,7 +47,7 @@ def _get_metrics(metric_name: str = None):
 
 
 @monitoring.get(
-    "/metrics/id={id}",
+    "/monitoring/metrics/id={id}",
     summary="Get the lastest metrics from the cloud analytics application of a machine by its id",
     status_code=status.HTTP_200_OK,
     response_model=list[Metric],
@@ -75,7 +75,7 @@ def _get_metrics_by_id(id: str, metric_name: str = None):
 
 
 @monitoring.get(
-    "/metrics/hostname={hostname}",
+    "/monitoring/metrics/hostname={hostname}",
     summary="Get the lastest metrics from the cloud analytics application by the machine hostname",
     status_code=status.HTTP_200_OK,
     response_model=list[Metric],
