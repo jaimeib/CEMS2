@@ -69,7 +69,7 @@ async def main():
         # Start the Cloud Analytics Manager (Task 2)
         nursery.start_soon(start_cloud_analytics_manager, cloud_analytics_manager)
         # Start the Machine Control Manager (Task 3)
-        # nursery.start_soon(start_machines_control_manager, machines_control_manager)
+        nursery.start_soon(start_machines_control_manager, machines_control_manager)
 
 
 if __name__ == "__main__":

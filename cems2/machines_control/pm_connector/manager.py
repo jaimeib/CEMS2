@@ -35,3 +35,11 @@ class Manager(object):
         LOG.debug("Physical Machines Connectors loaded: %s", pm_connectors_list)
 
     # TODO: Apagados y encendidos de máquinas dinamicos -> Como se decide que conectores se usan?
+
+    def get_installed_plugins(self):
+        """Get the list of installed Physical Machines connectors.
+
+        :return: The list of installed Physical Machines connectors
+        :rtype: list[str]
+        """
+        return plugin_loader.get_pm_connectors_names()

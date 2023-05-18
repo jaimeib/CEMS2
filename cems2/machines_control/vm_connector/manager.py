@@ -34,3 +34,11 @@ class Manager(object):
         ]
         self.vm_connectors = vm_connectors
         LOG.debug("Virtual Machines Connectors loaded: %s", vm_connectors_list)
+
+    def get_installed_plugins(self):
+        """Get the list of installed Virtual Machines connectors.
+
+        :return: The list of installed Virtual Machines connectors
+        :rtype: list[str]
+        """
+        return plugin_loader.get_vm_connectors_names()

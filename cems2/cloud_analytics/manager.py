@@ -25,8 +25,8 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
-        self.collector = None
-        self.reporter = None
+        self.collector = collector_manager.Manager()
+        self.reporter = reporter_manager.Manager()
 
         # List of machines to monitor
         self.machines_monitoring = []
@@ -36,12 +36,8 @@ class Manager(object):
         self.metrics = {}
 
         # Monitoring interval
-        self.monitoring_interval = None
-
-    def load_managers(self):
-        """Load the managers required by the cloud_analytics manager."""
-        self.collector = collector_manager.Manager()
-        self.reporter = reporter_manager.Manager()
+        self.monitoring_interval = CONFIG.getint("cloud_analytics", "interval")
+        LOG.info("Monitoring interval set to %s", self.monitoring_interval)
 
     def set_machines(self, machines_list):
         """Update the machines to monitor.
@@ -50,28 +46,18 @@ class Manager(object):
         :type machines_list: list[Machine]
         """
 
+        print(self)
         self.machines_monitoring = machines_list.copy()
         LOG.info(
             "Machines to monitor: %s", [machine.hostname for machine in machines_list]
         )
 
-    def set_monitoring_interval(self):
-        """Set the monitoring interval for the Analytics Manager."""
-        self.monitoring_interval = CONFIG.getint("cloud_analytics", "interval")
-        LOG.info("Monitoring interval set to %s", self.monitoring_interval)
-
     def run(self):
         """Run the cloud_analytics manager.
 
-        - Load the managers
         - Get the metrics from the collector manager
         - Send the metrics to the reporter manager
         """
-        # Load the managers
-        self.load_managers()
-
-        # Set the monitoring interval
-        self.set_monitoring_interval()
 
         # Run periodically as the monitoring interval
         while True:
@@ -99,6 +85,9 @@ class Manager(object):
 
     def get_plugins(self, plugin_type: str):
         """Obtain the installed plugins.
+
+        :param plugin_type: type of plugin to obtain
+        :type plugin_type: str
 
         :return: list of installed plugins
         :rtype: list[Plugin]

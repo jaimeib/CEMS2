@@ -36,3 +36,11 @@ class Manager(object):
         ]
         self.vm_optimizations = vm_optimizations
         LOG.debug("Virtual Machines Optimizations loaded: %s", vm_optimizations_list)
+
+    def get_installed_plugins(self):
+        """Get the list of installed Virtual Machines optimizations.
+
+        :return: The list of installed Virtual Machines optimizations
+        :rtype: list[str]
+        """
+        return plugin_loader.get_vm_optimizations_names()

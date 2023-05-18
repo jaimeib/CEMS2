@@ -37,3 +37,11 @@ class Manager(object):
         ]
         self.pm_optimizations = pm_optimizations
         LOG.debug("Physical Machines Optimizations loaded: %s", pm_optimizations_list)
+
+    def get_installed_plugins(self):
+        """Get the list of installed Physical Machines optimizations.
+
+        :return: The list of installed Physical Machines optimizations
+        :rtype: list[str]
+        """
+        return plugin_loader.get_pm_optimizations_names()

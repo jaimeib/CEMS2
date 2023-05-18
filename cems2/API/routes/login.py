@@ -11,6 +11,8 @@ login = APIRouter()
 # Get the logger
 LOG = log.get_logger(__name__)
 
+# API ENDPOINTS
+
 
 # Validate the user credentials usign the OpenStack Keystone API
 @login.post(

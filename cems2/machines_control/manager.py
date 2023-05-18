@@ -7,6 +7,7 @@ import cems2.machines_control.pm_optimization.manager as pm_optimization_manager
 import cems2.machines_control.vm_connector.manager as vm_connector_manager
 import cems2.machines_control.vm_optimization.manager as vm_optimization_manager
 from cems2 import config_loader, log
+from cems2.schemas.plugin import Plugin
 
 # Get the logger
 LOG = log.get_logger(__name__)
@@ -27,13 +28,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
-        self.vm_optimization = None
-        self.pm_optimization = None
-        self.vm_connector = None
-        self.pm_connector = None
-
-    def load_managers(self):
-        """Load the managers required by the machines_control manager."""
         self.vm_optimization = vm_optimization_manager.Manager()
         self.pm_optimization = pm_optimization_manager.Manager()
         self.vm_connector = vm_connector_manager.Manager()
@@ -54,3 +48,40 @@ class Manager(object):
         while True:
             print("Machines Control Manager running...")
             time.sleep(1)
+
+    def get_plugins(self, plugin_type: str):
+        """Obtain the installed plugins.
+
+        :param plugin_type: type of plugin to obtain
+        :type plugin_type: str
+
+        :return: list of installed plugins
+        :rtype: list[Plugin]
+        """
+
+        plugins = []
+        if plugin_type == "vm_optimization":
+            # Create a list of plugins with the name and type of each plugin
+            plugins = [
+                Plugin(name=plugin, type=plugin_type)
+                for plugin in self.vm_optimization.get_installed_plugins()
+            ]
+        elif plugin_type == "pm_optimization":
+            plugins = [
+                Plugin(name=plugin, type=plugin_type)
+                for plugin in self.pm_optimization.get_installed_plugins()
+            ]
+        elif plugin_type == "vm_connector":
+            plugins = [
+                Plugin(name=plugin, type=plugin_type)
+                for plugin in self.vm_connector.get_installed_plugins()
+            ]
+        elif plugin_type == "pm_connector":
+            plugins = [
+                Plugin(name=plugin, type=plugin_type)
+                for plugin in self.pm_connector.get_installed_plugins()
+            ]
+        else:
+            plugins = None
+
+        return plugins
