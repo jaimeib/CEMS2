@@ -42,8 +42,6 @@ class Manager(object):
         - Get the Physical Machines optimizations
         - Apply the Physical Machines optimizations
         """
-        # Load the managers
-        self.load_managers()
 
         while True:
             print("Machines Control Manager running...")

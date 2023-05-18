@@ -3,7 +3,6 @@
 from fastapi import APIRouter, HTTPException, status
 
 from cems2 import log
-from cems2.__main__ import cloud_analytics_manager
 from cems2.API.routes import machine as machine_manager
 from cems2.schemas.machine import Machine
 from cems2.schemas.message import Message
@@ -15,6 +14,20 @@ monitoring = APIRouter()
 
 # Get the logger
 LOG = log.get_logger(__name__)
+
+
+class MonitoringController(object):
+    def __init__(self):
+        self.cloud_analytics_manager = None
+
+    def set_cloud_analytics_manager(self, cloud_analytics_manager):
+        self.cloud_analytics_manager = cloud_analytics_manager
+        print("MONITORING:", self.cloud_analytics_manager)
+        print("MONITORING:", id(self.cloud_analytics_manager))
+
+
+# Create the monitoring controller
+monitoring_controller = MonitoringController()
 
 # API ENDPOINTS
 
@@ -116,7 +129,7 @@ def _get_plugins(plugin_type: str):
 
     **Raises**: HTTPException (status code 404): No plugins found
     """
-    plugin_list = cloud_analytics_manager.get_plugins(plugin_type)
+    plugin_list = monitoring_controller.cloud_analytics_manager.get_plugins(plugin_type)
 
     if not plugin_list:
         raise HTTPException(
@@ -125,6 +138,9 @@ def _get_plugins(plugin_type: str):
         )
 
     return plugin_list
+
+
+# INTERNAL METHODS
 
 
 def machines_on_monitoring():
@@ -151,5 +167,6 @@ def machines_on_monitoring():
 
 def notify_update_monitoring():
     """Notify to the CloudAnalyticsManager a machine update."""
-    print(cloud_analytics_manager)
-    cloud_analytics_manager.set_machines(machines_on_monitoring())
+    monitoring_controller.cloud_analytics_manager.machines_monitoring = (
+        machines_on_monitoring()
+    )

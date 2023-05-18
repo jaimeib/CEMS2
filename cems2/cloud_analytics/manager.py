@@ -1,11 +1,11 @@
 """cloud_analytics manager module."""
 
+import copy
 import time
 
 import cems2.cloud_analytics.collector.manager as collector_manager
 import cems2.cloud_analytics.reporter.manager as reporter_manager
 from cems2 import config_loader, log
-from cems2.schemas.machine import Machine  # TODO: To test
 from cems2.schemas.plugin import Plugin
 
 # Get the logger
@@ -25,21 +25,26 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
-        self.collector = collector_manager.Manager()
-        self.reporter = reporter_manager.Manager()
+        print("ESTO SE HACE CUANDO HAGO UN IMPORT DE ESTE MODULO")
+        self.collector = None
+        self.reporter = None
 
         # List of machines to monitor
-        self.machines_monitoring = []
+        self._machines_monitoring = []
 
         # Dictionary to store the last metrics of each machine
         # (key: hostname, value: list of metrics)
         self.metrics = {}
 
         # Monitoring interval
-        self.monitoring_interval = CONFIG.getint("cloud_analytics", "interval")
-        LOG.info("Monitoring interval set to %s", self.monitoring_interval)
+        self.monitoring_interval = None
 
-    def set_machines(self, machines_list):
+    @property
+    def machines_monitoring(self):
+        return self._machines_monitoring
+
+    @machines_monitoring.setter
+    def machines_monitoring(self, machines_list):
         """Update the machines to monitor.
 
         :param machines_list: list of machines to monitor
@@ -47,9 +52,21 @@ class Manager(object):
         """
 
         print(self)
-        self.machines_monitoring = machines_list.copy()
+        self._machines_monitoring = machines_list
+        print(id(self.machines_monitoring))
         LOG.info(
-            "Machines to monitor: %s", [machine.hostname for machine in machines_list]
+            "Machines to monitor: %s",
+            [machine.hostname for machine in self.machines_monitoring],
+        )
+
+    def _load_managers(self):
+        self.collector = collector_manager.Manager()
+        self.reporter = reporter_manager.Manager()
+
+    def _set_monitoring_interval(self):
+        self.monitoring_interval = CONFIG.getint("cloud_analytics", "interval")
+        LOG.info(
+            "Monitoring interval set to %s (id=%s)", self.monitoring_interval, id(self)
         )
 
     def run(self):
@@ -59,11 +76,20 @@ class Manager(object):
         - Send the metrics to the reporter manager
         """
 
+        # Load the managers
+        self._load_managers()
+
+        # Set the monitoring interval
+        self._set_monitoring_interval()
+
         # Run periodically as the monitoring interval
         while True:
             # Wait the monitoring interval
             LOG.debug("Waiting %s seconds", self.monitoring_interval)
             time.sleep(self.monitoring_interval)
+
+            print("MANAGER:", id(self))
+            print("MANAGER:", self)
 
             # For each machine to monitor
             for machine in self.machines_monitoring:
@@ -92,6 +118,8 @@ class Manager(object):
         :return: list of installed plugins
         :rtype: list[Plugin]
         """
+        print(id(self))
+        print(self)
         plugins = []
         if plugin_type == "collector":
             # Create a list of plugins with the name and type of each plugin

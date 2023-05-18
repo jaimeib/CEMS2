@@ -3,7 +3,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from cems2 import log
-from cems2.__main__ import machines_control_manager
+
+# from cems2.__main__ import machines_control_manager
 from cems2.schemas.plugin import Plugin
 
 # Create the actions controller router

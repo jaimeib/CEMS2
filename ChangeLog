@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+* Added endpoints to obtain de names of the plugins
+* Unified Endpoints path on monitoring controller
+* Launcher usign async library trio
+* Added base plugins for machines control system
 * Disable monitoring flag when disable a machine in the file
 * Cloud Analytics + Machines Control Plugin system with Stevedore completed
 * Update doc usign tox testing
