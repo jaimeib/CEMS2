@@ -3,7 +3,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from cems2 import log
-from cems2.API.routes import machine as machine_manager
 from cems2.schemas.plugin import Plugin
 
 # Create the actions controller router
@@ -19,6 +18,8 @@ class ActionsController(object):
     def __init__(self):
         """Initialize the controller."""
         self.machines_control_manager = None
+        self.machine_manager = None
+        self.monitoring_controller = None
 
     def set_machines_control_manager(self, machines_control_manager):
         """Set the machines control manager.
@@ -27,6 +28,22 @@ class ActionsController(object):
         :type machines_control_manager: Manager
         """
         self.machines_control_manager = machines_control_manager
+
+    def set_machine_manager(self, machine_manager):
+        """Set the machine manager.
+
+        :param machine_manager: machine manager
+        :type machine_manager: MachineManager
+        """
+        self.machine_manager = machine_manager
+
+    def set_monitoring_controller(self, monitoring_controller):
+        """Set the monitoring controller.
+
+        :param monitoring_controller: monitoring controller
+        :type monitoring_controller: MonitoringController
+        """
+        self.monitoring_controller = monitoring_controller
 
 
 # Create the actions controller

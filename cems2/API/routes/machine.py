@@ -6,8 +6,6 @@ from sqlalchemy.orm import Session
 from cems2 import log
 from cems2.API.database.config import get_db
 from cems2.API.models.machine import Machines
-from cems2.API.routes import actions as actions_controller
-from cems2.API.routes import monitoring as monitoring_controller
 from cems2.schemas.machine import Machine
 from cems2.schemas.message import Message
 
@@ -17,8 +15,114 @@ machines = APIRouter()
 # Get the LOG
 LOG = log.get_logger(__name__)
 
-# CRUD operations (Only read and update status and monitoring)
-# The rest of the operations and modifications are done through the configuration files
+
+class MachineManager(object):
+    """Machine Manager class."""
+
+    def __init__(self):
+        """Initialize the manager."""
+        self.monitoring_controller = None
+        self.actions_controller = None
+
+    def set_monitoring_controller(self, monitoring_controller):
+        """Set the monitoring controller.
+
+        :param monitoring_controller: monitoring controller
+        :type monitoring_controller: MonitoringController
+        """
+        self.monitoring_controller = monitoring_controller
+
+    def set_actions_controller(self, actions_controller):
+        """Set the actions controller.
+
+        :param actions_controller: actions controller
+        :type actions_controller: ActionsController
+        """
+        self.actions_controller = actions_controller
+
+    def get_machines(
+        self,
+        group_name: str = None,
+        brand_model: str = None,
+        energy_status: bool = None,
+        monitoring: bool = None,
+        available: bool = None,
+    ):
+        """Get the machines from the database.
+
+        :param group_name: The group name of the machines
+        :type group_name: str
+
+        :param brand_model: The brand model of the machines
+        :type brand_model: str
+
+        :param energy_status: The energy status of the machines
+        :type energy_status: bool
+
+        :param monitoring: The monitoring status of the machines
+        :type monitoring: bool
+
+        :param available: The availability status of the machines
+        :type available: bool
+
+        :return: The machines
+        :rtype: list[Machine (Model)]
+        """
+        try:
+            machine_list = _get_machines(
+                group_name=group_name,
+                brand_model=brand_model,
+                energy_status=energy_status,
+                monitoring=monitoring,
+                available=available,
+                db_session=next(get_db()),
+            )
+        except Exception as e:
+            LOG.error(f"Error getting the machines: {e}")
+            exit(1)
+
+        return machine_list
+
+    def get_machine_by_id(self, machine_id: int):
+        """Get the machine from the database.
+
+        :param machine_id: The ID of the machine
+        :type machine_id: int
+
+        :return: The machine
+        :rtype: Machine (Model)
+        """
+        try:
+            machine = _get_machine_by_id(machine_id, db_session=next(get_db()))
+        except Exception as e:
+            LOG.error(f"Error getting the machine: {e}")
+            return None
+
+        return machine
+
+    def get_machine_by_hostname(self, hostname: str):
+        """Get the machine from the database.
+
+        :param hostname: The hostname of the machine
+        :type hostname: str
+
+        :return: The machine
+        :rtype: Machine (Model)
+        """
+
+        try:
+            machine = _get_machine_by_hostname(
+                hostname=hostname, db_session=next(get_db())
+            )
+        except Exception as e:
+            LOG.error(f"Error getting the machine: {e}")
+            return None
+
+        return machine
+
+
+# Create the machine manager
+machine_manager = MachineManager()
 
 # API ENDPOINTS
 
@@ -356,7 +460,7 @@ def _update_machine_monitoring(
     LOG.warning(f"Machine with ID: {id} monitoring updated to: {monitoring}")
 
     # Notify the machine monitoring update to the monitoring controller
-    monitoring_controller.notify_update_monitoring()
+    machine_manager.monitoring_controller.notify_update_monitoring()
 
     # Return the machine updated
     return machine_model
@@ -421,51 +525,7 @@ def _update_machine_monitoring_by_hostname(
     )
 
     # Notify the machine monitoring update to the monitoring controller
-    monitoring_controller.notify_update_monitoring()
+    machine_manager.monitoring_controller.notify_update_monitoring()
 
     # Return the machine updated
     return machine_model
-
-
-# INTERNAL METHODS
-def get_machines(
-    group_name: str = None,
-    brand_model: str = None,
-    energy_status: bool = None,
-    monitoring: bool = None,
-    available: bool = None,
-):
-    """Get the machines from the database.
-
-    :param group_name: The group name of the machines
-    :type group_name: str
-
-    :param brand_model: The brand model of the machines
-    :type brand_model: str
-
-    :param energy_status: The energy status of the machines
-    :type energy_status: bool
-
-    :param monitoring: The monitoring status of the machines
-    :type monitoring: bool
-
-    :param available: The availability status of the machines
-    :type available: bool
-
-    :return: The machines
-    :rtype: list[Machine (Model)]
-    """
-    try:
-        machine_list = _get_machines(
-            group_name=group_name,
-            brand_model=brand_model,
-            energy_status=energy_status,
-            monitoring=monitoring,
-            available=available,
-            db_session=next(get_db()),
-        )
-    except Exception as e:
-        LOG.error(f"Error getting the machines: {e}")
-        exit(1)
-
-    return machine_list
