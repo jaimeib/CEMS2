@@ -28,6 +28,12 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
+        self.vm_optimization = None
+        self.pm_optimization = None
+        self.vm_connector = None
+        self.pm_connector = None
+
+    def _load_managers(self):
         self.vm_optimization = vm_optimization_manager.Manager()
         self.pm_optimization = pm_optimization_manager.Manager()
         self.vm_connector = vm_connector_manager.Manager()
@@ -43,43 +49,44 @@ class Manager(object):
         - Apply the Physical Machines optimizations
         """
 
+        # Load the managers
+        self._load_managers()
+
         while True:
             print("Machines Control Manager running...")
             time.sleep(1)
 
-    def get_plugins(self, plugin_type: str):
+    def get_plugins(self):
         """Obtain the installed plugins.
-
-        :param plugin_type: type of plugin to obtain
-        :type plugin_type: str
 
         :return: list of installed plugins
         :rtype: list[Plugin]
         """
 
         plugins = []
-        if plugin_type == "vm_optimization":
-            # Create a list of plugins with the name and type of each plugin
-            plugins = [
-                Plugin(name=plugin, type=plugin_type)
-                for plugin in self.vm_optimization.get_installed_plugins()
-            ]
-        elif plugin_type == "pm_optimization":
-            plugins = [
-                Plugin(name=plugin, type=plugin_type)
-                for plugin in self.pm_optimization.get_installed_plugins()
-            ]
-        elif plugin_type == "vm_connector":
-            plugins = [
-                Plugin(name=plugin, type=plugin_type)
-                for plugin in self.vm_connector.get_installed_plugins()
-            ]
-        elif plugin_type == "pm_connector":
-            plugins = [
-                Plugin(name=plugin, type=plugin_type)
-                for plugin in self.pm_connector.get_installed_plugins()
-            ]
-        else:
-            plugins = None
+
+        # Get the pm_connector plugins
+        plugins.extend(
+            Plugin(name=plugin, type="pm_connector")
+            for plugin in self.pm_connector.get_installed_plugins()
+        )
+
+        # Get the pm_optimization plugins
+        plugins.extend(
+            Plugin(name=plugin, type="pm_optimization")
+            for plugin in self.pm_optimization.get_installed_plugins()
+        )
+
+        # Get the vm_connector plugins
+        plugins.extend(
+            Plugin(name=plugin, type="vm_connector")
+            for plugin in self.vm_connector.get_installed_plugins()
+        )
+
+        # Get the vm_optimization plugins
+        plugins.extend(
+            Plugin(name=plugin, type="vm_optimization")
+            for plugin in self.vm_optimization.get_installed_plugins()
+        )
 
         return plugins

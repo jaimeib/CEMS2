@@ -25,7 +25,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
-        print("ESTO SE HACE CUANDO HAGO UN IMPORT DE ESTE MODULO")
         self.collector = None
         self.reporter = None
 
@@ -51,19 +50,19 @@ class Manager(object):
         :type machines_list: list[Machine]
         """
 
-        print(self)
         self._machines_monitoring = machines_list
-        print(id(self.machines_monitoring))
         LOG.info(
             "Machines to monitor: %s",
             [machine.hostname for machine in self.machines_monitoring],
         )
 
     def _load_managers(self):
+        """Load the collector and reporter managers."""
         self.collector = collector_manager.Manager()
         self.reporter = reporter_manager.Manager()
 
     def _set_monitoring_interval(self):
+        """Set the monitoring interval of the manager."""
         self.monitoring_interval = CONFIG.getint("cloud_analytics", "interval")
         LOG.info(
             "Monitoring interval set to %s (id=%s)", self.monitoring_interval, id(self)
@@ -71,9 +70,11 @@ class Manager(object):
 
     def run(self):
         """Run the cloud_analytics manager.
-
-        - Get the metrics from the collector manager
-        - Send the metrics to the reporter manager
+        - Load the collector and reporter managers
+        - Set the monitoring interval
+        - Run periodically as the monitoring interval
+            - Get the metrics from the collector manager
+            - Send the metrics to the reporter manager
         """
 
         # Load the managers
@@ -87,9 +88,6 @@ class Manager(object):
             # Wait the monitoring interval
             LOG.debug("Waiting %s seconds", self.monitoring_interval)
             time.sleep(self.monitoring_interval)
-
-            print("MANAGER:", id(self))
-            print("MANAGER:", self)
 
             # For each machine to monitor
             for machine in self.machines_monitoring:
@@ -109,7 +107,7 @@ class Manager(object):
         """
         return self.metrics
 
-    def get_plugins(self, plugin_type: str):
+    def get_plugins(self):
         """Obtain the installed plugins.
 
         :param plugin_type: type of plugin to obtain
@@ -118,22 +116,17 @@ class Manager(object):
         :return: list of installed plugins
         :rtype: list[Plugin]
         """
-        print(id(self))
-        print(self)
         plugins = []
-        if plugin_type == "collector":
-            # Create a list of plugins with the name and type of each plugin
-            plugins = [
-                Plugin(name=plugin, type=plugin_type)
-                for plugin in self.collector.get_installed_plugins()
-            ]
-        elif plugin_type == "reporter":
-            # Create a list of plugins with the name and type of each plugin
-            plugins = [
-                Plugin(name=plugin, type=plugin_type)
-                for plugin in self.reporter.get_installed_plugins()
-            ]
-        else:
-            plugins = None
 
+        # Get the collector plugins
+        plugins.extend(
+            Plugin(name=plugin, type="collector")
+            for plugin in self.collector.get_installed_plugins()
+        )
+
+        # Get the reporter plugins
+        plugins.extend(
+            Plugin(name=plugin, type="reporter")
+            for plugin in self.reporter.get_installed_plugins()
+        )
         return plugins

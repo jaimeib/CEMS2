@@ -17,17 +17,24 @@ LOG = log.get_logger(__name__)
 
 
 class MonitoringController(object):
+    """Monitoring Controller class."""
+
     def __init__(self):
+        """Initialize the controller."""
         self.cloud_analytics_manager = None
 
     def set_cloud_analytics_manager(self, cloud_analytics_manager):
+        """Set the cloud analytics manager.
+
+        :param cloud_analytics_manager: cloud analytics manager
+        :type cloud_analytics_manager: Manager
+        """
         self.cloud_analytics_manager = cloud_analytics_manager
-        print("MONITORING:", self.cloud_analytics_manager)
-        print("MONITORING:", id(self.cloud_analytics_manager))
 
 
 # Create the monitoring controller
 monitoring_controller = MonitoringController()
+
 
 # API ENDPOINTS
 
@@ -116,12 +123,12 @@ def _get_metrics_by_hostname(hostname: str, metric_name: str = None):
 
 
 @monitoring.get(
-    "/monitoring/plugins={plugin_type}",
+    "/monitoring/plugins",
     summary="Get the plugins installed by type (Collector or Reporter)",
     status_code=status.HTTP_200_OK,
     response_model=list[Plugin],
 )
-def _get_plugins(plugin_type: str):
+def _get_plugins(type: str = None):
     """
     Get the plugins installed by type (Collector or Reporter).
 
@@ -129,13 +136,17 @@ def _get_plugins(plugin_type: str):
 
     **Raises**: HTTPException (status code 404): No plugins found
     """
-    plugin_list = monitoring_controller.cloud_analytics_manager.get_plugins(plugin_type)
+    plugin_list = monitoring_controller.cloud_analytics_manager.get_plugins()
 
     if not plugin_list:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No plugins found",
         )
+
+    # Filter the plugins by type
+    if type:
+        plugin_list = [plugin for plugin in plugin_list if plugin.type == type]
 
     return plugin_list
 
