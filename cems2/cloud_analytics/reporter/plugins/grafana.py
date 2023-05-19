@@ -1,4 +1,4 @@
-"""This module contains the implementation of the Grafana Matric Reporter class."""
+"""Grafana Metric Reporter Plugin."""
 
 from cems2 import log
 from cems2.cloud_analytics.reporter.base import MetricReporterBase

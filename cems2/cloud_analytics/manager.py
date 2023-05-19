@@ -65,7 +65,7 @@ class Manager(object):
         """Set the monitoring interval of the manager."""
         self.monitoring_interval = CONFIG.getint("cloud_analytics", "interval")
         LOG.info(
-            "Monitoring interval set to %s (id=%s)", self.monitoring_interval, id(self)
+            "Monitoring interval set to %s seconds", self.monitoring_interval, id(self)
         )
 
     def run(self):
@@ -85,10 +85,6 @@ class Manager(object):
 
         # Run periodically as the monitoring interval
         while True:
-            # Wait the monitoring interval
-            LOG.debug("Waiting %s seconds", self.monitoring_interval)
-            time.sleep(self.monitoring_interval)
-
             # For each machine to monitor
             for machine in self.machines_monitoring:
                 # Get the metrics from the collector manager
@@ -97,6 +93,10 @@ class Manager(object):
                 )
                 # Send the metrics to the reporter manager
                 self.reporter.send_metrics(self.metrics[machine.hostname])
+
+            # Wait the monitoring interval
+            LOG.debug("Waiting %s seconds", self.monitoring_interval)
+            time.sleep(self.monitoring_interval)
 
     # Communication with de API monitoring controller
     def obtain_last_metrics(self):
