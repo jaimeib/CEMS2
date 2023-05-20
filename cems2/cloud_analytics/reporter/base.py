@@ -11,5 +11,5 @@ class MetricReporterBase(metaclass=ABCMeta):
         """Initialize the connection to report platform."""
 
     @abstractmethod
-    def report_metric(self, metric_list):
+    async def report_metric(self, metric_list):
         """Report the metric to report platform."""

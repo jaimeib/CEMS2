@@ -17,7 +17,7 @@ class OpenStackUtilization(MetricCollectorBase):
         """Initialize the connection to the OpenStack cloud platform."""
         # TODO: Open a session to the OpenStack cloud platform
 
-    def collect_metric(self, machine_id):
+    async def collect_metric(self, machine_id):
         """Collect the utilization metric from the OpenStack cloud platform."""
         LOG.info("Collecting utilization metric from OpenStack cloud platform")
         metric = Metric(

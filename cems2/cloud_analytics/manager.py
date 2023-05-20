@@ -3,6 +3,8 @@
 import copy
 import time
 
+import trio
+
 import cems2.cloud_analytics.collector.manager as collector_manager
 import cems2.cloud_analytics.reporter.manager as reporter_manager
 from cems2 import config_loader, log
@@ -64,9 +66,7 @@ class Manager(object):
     def _set_monitoring_interval(self):
         """Set the monitoring interval of the manager."""
         self.monitoring_interval = CONFIG.getint("cloud_analytics", "interval")
-        LOG.info(
-            "Monitoring interval set to %s seconds", self.monitoring_interval, id(self)
-        )
+        LOG.info("Monitoring interval set to %s seconds", self.monitoring_interval)
 
     def run(self):
         """Run the cloud_analytics manager.
@@ -85,18 +85,24 @@ class Manager(object):
 
         # Run periodically as the monitoring interval
         while True:
-            # For each machine to monitor
-            for machine in self.machines_monitoring:
-                # Get the metrics from the collector manager
-                self.metrics[machine.hostname] = self.collector.get_metrics(
-                    machine.hostname
-                )
-                # Send the metrics to the reporter manager
-                self.reporter.send_metrics(self.metrics[machine.hostname])
+            if self.machines_monitoring:
+                LOG.warning("Starting monitoring")
+                # Run the monitoring async function
+                trio.run(self._monitoring)
+                # Wait the monitoring interval
+                LOG.debug("Waiting %s seconds", self.monitoring_interval)
+                time.sleep(self.monitoring_interval)
 
-            # Wait the monitoring interval
-            LOG.debug("Waiting %s seconds", self.monitoring_interval)
-            time.sleep(self.monitoring_interval)
+    async def _monitoring(self):
+        # Create an async task for each machine
+        async with trio.open_nursery() as nursery:
+            for machine in self.machines_monitoring:
+                nursery.start_soon(self._monitor_machine, machine)
+
+    async def _monitor_machine(self, machine):
+        metrics = await self.collector.get_metrics(machine.hostname)
+        self.metrics[machine.hostname] = metrics
+        await self.reporter.send_metrics(metrics)
 
     # Communication with de API monitoring controller
     def obtain_last_metrics(self):

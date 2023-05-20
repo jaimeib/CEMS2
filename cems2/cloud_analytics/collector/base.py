@@ -11,5 +11,5 @@ class MetricCollectorBase(metaclass=ABCMeta):
         """Initialize the connection to the cloud platform."""
 
     @abstractmethod
-    def collect_metric(self, machine_id):
+    async def collect_metric(self, machine_id):
         """Collect the metric from the cloud platform."""

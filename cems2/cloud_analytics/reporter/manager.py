@@ -1,5 +1,7 @@
 """Reporter Manager module."""
 
+import trio
+
 from cems2 import config_loader, log
 from cems2.cloud_analytics import plugin_loader
 
@@ -32,16 +34,19 @@ class Manager(object):
         self.reporters = reporters
         LOG.debug("Reporters loaded: %s", reporters_list)
 
-    def send_metrics(self, metric_list):
+    async def send_metrics(self, metric_list):
         """Send the metrics to the reporters.
 
         :param metric_list: The list of metrics to send
         :type metric_list: list[Metric]
         """
-        # For each reporter
-        for reporter_name, reporter_cls in self.reporters:
-            # Send the metrics
-            reporter_cls().report_metric(metric_list)
+        # Create an async task for each reporter
+        async with trio.open_nursery() as nursery:
+            for reporter_name, reporter_cls in self.reporters:
+                nursery.start_soon(self._forward_metrics, reporter_cls, metric_list)
+
+    async def _forward_metrics(self, reporter, metric_list):
+        await reporter().report_metric(metric_list)
 
     def get_installed_plugins(self):
         """Get the list of installed reporters.

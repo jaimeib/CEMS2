@@ -13,7 +13,7 @@ class Test(MetricReporterBase):
     def __init__(self):
         """Initialize the test reporter."""
 
-    def report_metric(self, metric_list):
+    async def report_metric(self, metric_list):
         """Report the metric."""
         LOG.info("Reporting metrics to Test reporter")
         print("Test-Reporter:", metric_list)

@@ -13,7 +13,7 @@ class Grafana(MetricReporterBase):
     def __init__(self):
         """Initialize the connection to Grafana Dashboard."""
 
-    def report_metric(self, metric_list):
+    async def report_metric(self, metric_list):
         """Report the metric to Grafana Dashboard."""
         LOG.info("Reporting metrics to Grafana Dashboard")
         print("Report:", metric_list)

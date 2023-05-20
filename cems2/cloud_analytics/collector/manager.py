@@ -1,5 +1,7 @@
 """Collector Manager module."""
 
+import trio
+
 from cems2 import config_loader, log
 from cems2.cloud_analytics import plugin_loader
 
@@ -32,7 +34,7 @@ class Manager(object):
         self.collectors = collectors
         LOG.debug("Collectors loaded: %s", collectors_list)
 
-    def get_metrics(self, machine_id):
+    async def get_metrics(self, machine_id):
         """Get the metric list from the collectors for the instance.
 
         :param machine_id: The ID of the machine
@@ -43,15 +45,18 @@ class Manager(object):
         """
         metric_list = []
 
-        # For each collector
-        for collector_name, collector_cls in self.collectors:
-            # Get the metric for each collector
-            metric = collector_cls().collect_metric(machine_id)
-
-            # Add the metric to the list
-            metric_list.append(metric)
+        # Create an async task for each collector
+        async with trio.open_nursery() as nursery:
+            for collector_name, collector_cls in self.collectors:
+                nursery.start_soon(
+                    self._obtain_metrics, collector_cls, machine_id, metric_list
+                )
 
         return metric_list
+
+    async def _obtain_metrics(self, collector, machine_id, metric_list):
+        metric = await collector().collect_metric(machine_id)
+        metric_list.append(metric)
 
     def get_installed_plugins(self):
         """Get the list of installed collectors.

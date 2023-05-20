@@ -1,4 +1,4 @@
-"""Metric collector test plug-in."""
+"""Metric collector test 2 plug-in."""
 
 import random
 from datetime import datetime
@@ -11,7 +11,7 @@ from cems2.schemas.metric import Metric
 LOG = log.get_logger(__name__)
 
 
-class Test(MetricCollectorBase):
+class Test2(MetricCollectorBase):
     """Allows to test the collect the metrics."""
 
     def __init__(self):
@@ -22,12 +22,12 @@ class Test(MetricCollectorBase):
         LOG.info("Collecting utilization metric from Test collector")
 
         # Generate a random float value between 0 and 100 and round it to 3 decimals
-        value = round(random.uniform(0, 100), 3)
+        value = round(random.uniform(1000, 2000), 3)
 
         metric = Metric(
-            name="test",
+            name="test2",
             value=value,
-            unit="%",
+            unit="MB/s",
             timestamp=datetime.now(),
             hostname=machine_id,
         )

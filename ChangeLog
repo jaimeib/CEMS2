@@ -1,6 +1,8 @@
 CHANGES
 =======
 
+* Created Cloud Analytics test plugins
+* Restructured API managers & controllers using 3 classes to implement them
 * Actions controller connected to Machines Control Manager + Added API endpoints to obtain plugins with filtering
 * Monitoring controller connected to Cloud Analytics Manager
 * Added endpoints to obtain de names of the plugins
