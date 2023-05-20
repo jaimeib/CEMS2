@@ -1,4 +1,4 @@
-"""IPMI Connector plug-in for Power Management."""
+"""IPMI Connector plug-in."""
 
 import pyipmi
 
@@ -13,7 +13,7 @@ ON = 1
 OFF = 0
 
 
-class IPMIPower(PMConnectorBase):
+class IPMI(PMConnectorBase):
     """Allows to connect to the IPMI interface of the physical machines."""
 
     def __init__(self):

@@ -17,6 +17,7 @@ class BaseMachine(BaseModel):
     )
     management_username: str = Field(max_length=255)
     management_password: str = Field(max_length=255)
+    connector: str = Field(max_length=255)
     monitoring: bool = False  # By default, the machine is unmonitored
     available: bool = True  # By default, the machine is available
 

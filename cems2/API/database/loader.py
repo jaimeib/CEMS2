@@ -114,6 +114,7 @@ def _create_hosts_list(group):
             management_ip=group["management_ip_range"][0],
             management_username=group["management_username"],
             management_password=group["management_password"],
+            connector=group["connector"],
             monitoring=False,  # By default, the machine is unmonitored
             available=True,  # By default, the machine is available
         )
@@ -158,6 +159,7 @@ def _create_hosts_list(group):
                 management_ip=str(first_ip),
                 management_username=group["management_username"],
                 management_password=group["management_password"],
+                connector=group["connector"],
                 monitoring=False,  # By default, the machine is unmonitored
                 available=True,  # By default, the machine is available
             )
@@ -259,6 +261,9 @@ def _find_particular_atributtes(hosts, host):
     # If the host has a particular management_password, add it to the host
     if "management_password" in host:
         _update_management_password(hosts, host)
+    # If the host has a particular connector, add it to the host
+    if "connector" in host:
+        _update_connector(hosts, host)
 
 
 def _update_brand_model(hosts, host):
@@ -345,6 +350,28 @@ def _update_management_password(hosts, host):
     if not found:
         LOG.error(
             f"The host {host['hostname']} does not exist, when looking for management_password."
+        )
+
+
+def _update_connector(hosts, host):
+    """Update the connector of the host.
+
+    :param hosts: List of hosts
+    :type hosts: list
+
+    :param host: Host to update the connector
+    :type host: dict
+    """
+    found = False
+    for h in hosts:
+        if h.hostname == host["hostname"]:
+            h.connector = host["connector"]
+            found = True
+            break
+    # If the host does not exist, notify it in the log because it is a mistake
+    if not found:
+        LOG.error(
+            f"The host {host['hostname']} does not exist, when looking for connector."
         )
 
 
@@ -452,6 +479,7 @@ def _check_host_data_changed(host):
         and machine.management_ip == host.management_ip
         and machine.management_username == host.management_username
         and machine.management_password == host.management_password
+        and machine.connector == host.connector
     ):
         return False
     else:

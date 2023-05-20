@@ -19,6 +19,7 @@ class Machines(Base):
     management_ip = Column(String(16), nullable=False, unique=True)
     management_username = Column(String(255), nullable=False)
     management_password = Column(String(255), nullable=False)
+    connector = Column(String(255), nullable=False)
     energy_status = Column(
         Boolean, nullable=True
     )  # This is the energy status of the machine (True = ON, False = OFF)
