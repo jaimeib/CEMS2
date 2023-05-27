@@ -15,12 +15,13 @@
         management_password: admin2
         connector: ssh #Specific connector
 
-# - groupname: cloudA
-#   brand_model: IBM Power 8
-#   hostname_range: [cloudA011] #Only one host
-#   management_ip_range: [10.128.1.11] #Only one host
-#   management_username: admin
-#   management_password: admin
+- groupname: cloudA
+  brand_model: IBM Power 8
+  hostname_range: [cloudA011] #Only one host
+  management_ip_range: [10.128.1.11] #Only one host
+  management_username: admin
+  management_password: admin
+  connector: IPMI
 
 - groupname: cloudA
   brand_model: IBM Power 8
@@ -40,9 +41,11 @@
   hosts:
       - hostname: cloudB02
         management_ip: 10.128.2.10 #Specific IP
-# - groupname: cloudC
-#   brand_model: Dell
-#   hostname_range: [cloudC01, cloudC05]
-#   management_ip_range: [10.128.3.11, 10.128.3.15]
-#   management_username: DellAdmin
-#   management_password: DellPass
+
+- groupname: cloudC
+  brand_model: Dell
+  hostname_range: [cloudC01, cloudC05]
+  management_ip_range: [10.128.3.11, 10.128.3.15]
+  management_username: DellAdmin
+  management_password: DellPass
+  connector: IPMI

@@ -19,7 +19,9 @@ class OpenStackUtilization(MetricCollectorBase):
 
     async def collect_metric(self, machine_id):
         """Collect the utilization metric from the OpenStack cloud platform."""
-        LOG.info("Collecting utilization metric from OpenStack cloud platform")
+        LOG.info(
+            "Collecting OpenStack utilization metric from the machine %s", machine_id
+        )
         metric = Metric(
             name="utilization",
             value=0.0,
