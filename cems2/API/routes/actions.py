@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from cems2 import log
+from cems2.schemas.message import Message
 from cems2.schemas.plugin import Plugin
 
 # Create the actions controller router
@@ -44,6 +45,20 @@ class ActionsController(object):
         :type monitoring_controller: MonitoringController
         """
         self.monitoring_controller = monitoring_controller
+
+    def notify_update_monitoring(self):
+        """Notify the update of the monitoring."""
+        self.machine_manager.physical_machines = (
+            self.monitoring_controller.get_machines_on_monitoring()
+        )
+
+    def new_metrics(self, metrics: dict):
+        """Get the new metrics from the monitoring controller.
+
+        :param metrics: new metrics
+        :type metrics: dict
+        """
+        self.machines_control_manager.new_metrics(metrics)
 
 
 # Create the actions controller
@@ -87,4 +102,45 @@ def _get_plugins(type: str = None):
     return plugin_list
 
 
-# INTERNAL METHODS
+@actions.get(
+    "/actions/machines_control",
+    summary="Get if the machines control application is running",
+    status_code=status.HTTP_200_OK,
+    response_model=bool,
+)
+def _get_actions_machines_control():
+    """
+    Get if the machines control application is running
+
+    **Returns**: A boolean with the state of the machines control application
+    """
+    return actions_controller.machines_control_manager.running
+
+
+# Switch on/off actions
+@actions.put(
+    "/actions/machines_control={state}",
+    summary="Switch on/off machines control actions",
+    status_code=status.HTTP_200_OK,
+    response_model=Message,
+)
+def _switch_actions_machines_control(state: bool):
+    """
+    Switch on/off machines control actions
+
+    **Returns**: A message with the result of the operation
+    """
+    # If the state is the same, do nothing
+    if actions_controller.machines_control_manager.running == state:
+        return Message(
+            message="Machines Control Application already {}".format(
+                "on" if state else "off"
+            )
+        )
+    else:
+        # If the state is different, switch the state
+        actions_controller.machines_control_manager.running = state
+
+        return Message(
+            message="Machines Control Application {}".format("on" if state else "off")
+        )

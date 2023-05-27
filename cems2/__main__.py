@@ -68,6 +68,9 @@ async def main():
     # Load the machine manager to the monitoring controller
     monitoring_controller.set_machine_manager(machine_manager)
 
+    # Load the actions controller to the monitoring controller
+    monitoring_controller.set_actions_controller(actions_controller)
+
     # Create the Cloud Analytics Manager
     cloud_analytics_manager = CloudAnalyticsManager()
 
@@ -90,6 +93,11 @@ async def main():
 
     # Load the machines_control_manager to the actions manager
     actions_controller.set_machines_control_manager(machines_control_manager)
+
+    # Update the physical_machines list in the machines_control_manager
+    machines_control_manager.physical_machines = (
+        monitoring_controller.machines_on_monitoring()
+    )
 
     # Create 3 tasks to run in parallel
     async with trio.open_nursery() as nursery:

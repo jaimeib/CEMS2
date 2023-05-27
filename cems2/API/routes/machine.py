@@ -462,6 +462,9 @@ def _update_machine_monitoring(
     # Notify the machine monitoring update to the monitoring controller
     machine_manager.monitoring_controller.notify_update_monitoring()
 
+    # Notify the machine monitoring update to the actions controller
+    machine_manager.actions_controller.notify_update_monitoring()
+
     # Return the machine updated
     return machine_model
 
@@ -526,6 +529,9 @@ def _update_machine_monitoring_by_hostname(
 
     # Notify the machine monitoring update to the monitoring controller
     machine_manager.monitoring_controller.notify_update_monitoring()
+
+    # Notify the machine monitoring update to the actions controller
+    machine_manager.actions_controller.notify_update_monitoring()
 
     # Return the machine updated
     return machine_model

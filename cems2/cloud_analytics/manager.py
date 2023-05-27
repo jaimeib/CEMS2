@@ -8,6 +8,7 @@ import trio
 import cems2.cloud_analytics.collector.manager as collector_manager
 import cems2.cloud_analytics.reporter.manager as reporter_manager
 from cems2 import config_loader, log
+from cems2.API.routes.monitoring import monitoring_controller
 from cems2.schemas.plugin import Plugin
 
 # Get the logger
@@ -27,6 +28,11 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
+
+        # API Controller
+        self.controller = monitoring_controller
+
+        # Submanagers
         self.collector = None
         self.reporter = None
 
@@ -39,6 +45,9 @@ class Manager(object):
 
         # Monitoring interval
         self.monitoring_interval = None
+
+        # On/off switch
+        self._running = None
 
     @property
     def machines_monitoring(self):
@@ -57,6 +66,24 @@ class Manager(object):
             "Machines to monitor: %s",
             [machine.hostname for machine in self.machines_monitoring],
         )
+
+    @property
+    def running(self):
+        return self._running
+
+    @running.setter
+    def running(self, value: bool):
+        """Update the running status of the manager.
+
+        :param value: value to set (on/off)
+        :type value: bool
+        """
+        self._running = value
+
+        if value is True:
+            LOG.warning("Cloud Analytics Manager started")
+        else:
+            LOG.warning("Cloud Analytics Manager stopped")
 
     def _load_managers(self):
         """Load the collector and reporter managers."""
@@ -83,12 +110,16 @@ class Manager(object):
         # Set the monitoring interval
         self._set_monitoring_interval()
 
+        # Set the running status to True
+        self.running = True
+
         # Run periodically as the monitoring interval
         while True:
-            if self.machines_monitoring:
-                LOG.warning("Starting monitoring")
+            if self.machines_monitoring and self.running:
                 # Run the monitoring async function
                 trio.run(self._monitoring)
+                # Notify the monitoring controller of the new metrics obtained
+                self.controller.notify_new_metrics(self.metrics)
                 # Wait the monitoring interval
                 LOG.debug("Waiting %s seconds", self.monitoring_interval)
                 time.sleep(self.monitoring_interval)

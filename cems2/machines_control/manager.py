@@ -28,10 +28,54 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
+
+        # Submanagers
         self.vm_optimization = None
         self.pm_optimization = None
         self.vm_connector = None
         self.pm_connector = None
+
+        # List of physical machines to control
+        self._physical_machines = None
+
+        # On/off switch
+        self._running = None
+
+    @property
+    def running(self):
+        return self._running
+
+    @running.setter
+    def running(self, value: bool):
+        """Update the running status of the manager.
+
+        :param value: new running status (on/off)
+        :type value: bool
+        """
+
+        self._running = value
+        if value is True:
+            LOG.warning("Machines Control Manager started")
+        else:
+            LOG.warning("Machines Control Manager stopped")
+
+    @property
+    def physical_machines(self):
+        return self._physical_machines
+
+    @physical_machines.setter
+    def physical_machines(self, machines_list: list):
+        """Update the list of physical machines.
+
+        :param machines_list: list of physical machines
+        :type machines_list: list
+        """
+
+        self._physical_machines = machines_list
+        LOG.info(
+            "Physical machines to control: %s",
+            [machine.hostname for machine in self.physical_machines],
+        )
 
     def _load_managers(self):
         self.vm_optimization = vm_optimization_manager.Manager()
@@ -52,9 +96,33 @@ class Manager(object):
         # Load the managers
         self._load_managers()
 
+        # Set the running status to True
+        self.running = True
+
         while True:
-            print("Machines Control Manager running...")
-            time.sleep(1)
+            if self.running:
+                print("Machines Control Manager running...")
+                time.sleep(1)
+            else:
+                # Boot all the physical machines
+                self.boot_all()
+                # Wait until the running status is set to True
+                while not self.running:
+                    time.sleep(1)
+
+    def new_metrics(self, metrics: dict):
+        """Get the last metrics from the monitoring controller.
+
+        :param metrics: last metrics
+        :type metrics: dict
+        """
+
+        print("Machines Control Manager: New metrics received")
+        print(metrics)
+
+    def boot_all(self):
+        """Boot all the physical machines."""
+        LOG.critical("Booting all the physical machines")
 
     def get_plugins(self):
         """Obtain the installed plugins.

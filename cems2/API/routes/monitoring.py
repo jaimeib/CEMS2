@@ -22,6 +22,7 @@ class MonitoringController(object):
         """Initialize the controller."""
         self.cloud_analytics_manager = None
         self.machine_manager = None
+        self.actions_controller = None
 
     def set_cloud_analytics_manager(self, cloud_analytics_manager):
         """Set the cloud analytics manager.
@@ -38,6 +39,14 @@ class MonitoringController(object):
         :type machine_manager: Manager
         """
         self.machine_manager = machine_manager
+
+    def set_actions_controller(self, actions_controller):
+        """Set the actions controller.
+
+        :param actions_controller: actions controller
+        :type actions_controller: ActionsController
+        """
+        self.actions_controller = actions_controller
 
     def machines_on_monitoring(self):
         """
@@ -63,6 +72,10 @@ class MonitoringController(object):
     def notify_update_monitoring(self):
         """Notify to the CloudAnalyticsManager a machine update."""
         self.cloud_analytics_manager.machines_monitoring = self.machines_on_monitoring()
+
+    def notify_new_metrics(self, metrics: dict):
+        """Notify to the ActionsController a new metrics update."""
+        self.actions_controller.new_metrics(metrics)
 
 
 # Create the monitoring controller
@@ -221,7 +234,7 @@ def _get_metrics_by_hostname(hostname: str, metric_name: str = None):
 )
 def _get_plugins(type: str = None):
     """
-    Get the plugins installed by type (Collector or Reporter).
+    Get the plugins installed by type.
 
     **Returns**: A list of plugins
 
@@ -240,3 +253,49 @@ def _get_plugins(type: str = None):
         plugin_list = [plugin for plugin in plugin_list if plugin.type == type]
 
     return plugin_list
+
+
+# Get if the cloud analytics application is running
+@monitoring.get(
+    "/monitoring/cloud-analytics",
+    summary="Get if the cloud analytics application is running",
+    status_code=status.HTTP_200_OK,
+    response_model=bool,
+)
+def _get_monitoring_cloud_analytics():
+    """
+    Get if the cloud analytics application is running.
+
+    **Returns**: A boolean with the state of the cloud analytics application
+    """
+    return monitoring_controller.cloud_analytics_manager.running
+
+
+@monitoring.put(
+    "/monitoring/cloud-analytics={state}",
+    summary="Switch on/off monitoring of the cloud analytics application",
+    status_code=status.HTTP_200_OK,
+    response_model=Message,
+)
+def _switch_monitoring_cloud_analytics(state: bool):
+    """
+    Switch on/off monitoring of the cloud analytics application.
+
+    **Returns**: A message with the result of the operation
+    """
+    # If the state is the same, do nothing
+    if monitoring_controller.cloud_analytics_manager.running == state:
+        return Message(
+            message="Cloud Analytics Application is already {}".format(
+                "on" if state else "off"
+            )
+        )
+    else:
+        # If the state is different, switch the state
+        monitoring_controller.cloud_analytics_manager.running = state
+
+        return Message(
+            message="Cloud Analytics Application switched {}".format(
+                "on" if state else "off"
+            )
+        )
