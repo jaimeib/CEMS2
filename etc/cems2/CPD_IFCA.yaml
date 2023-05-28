@@ -5,7 +5,7 @@
   management_ip_range: [10.128.1.1, 10.128.1.3] #Primary IP range
   management_username: admin #Management username
   management_password: admin #Management password
-  connector: IPMI #Connector to use (Same name as the connector plugin)
+  connector: test #Connector to use (Same name as the connector plugin)
   hosts:
       - hostname: cloudA001
         management_username: admin1 #Specific username
@@ -13,7 +13,7 @@
       - hostname: cloudA002
         management_username: admin2
         management_password: admin2
-        connector: ssh #Specific connector
+        connector: test #Specific connector
 
 - groupname: cloudA
   brand_model: IBM Power 8
@@ -21,7 +21,7 @@
   management_ip_range: [10.128.1.11] #Only one host
   management_username: admin
   management_password: admin
-  connector: IPMI
+  connector: test
 
 - groupname: cloudA
   brand_model: IBM Power 8
@@ -29,7 +29,7 @@
   management_ip_range: [10.128.1.21, 10.128.1.22] #Secondary IP range
   management_username: admin
   management_password: admin
-  connector: IPMI
+  connector: test
 
 - groupname: cloudB
   brand_model: Lenovo
@@ -37,7 +37,7 @@
   management_ip_range: [10.128.2.1, 10.128.2.5]
   management_username: LenovoAdmin
   management_password: LenovoPass
-  connector: IPMI
+  connector: test
   hosts:
       - hostname: cloudB02
         management_ip: 10.128.2.10 #Specific IP
@@ -48,4 +48,4 @@
   management_ip_range: [10.128.3.11, 10.128.3.15]
   management_username: DellAdmin
   management_password: DellPass
-  connector: IPMI
+  connector: test
