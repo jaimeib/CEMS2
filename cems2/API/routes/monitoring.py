@@ -48,11 +48,11 @@ class MonitoringController(object):
         """
         self.actions_controller = actions_controller
 
-    def machines_on_monitoring(self):
+    def machines_monitoring_and_on(self):
         """
-        Get the machines on monitoring state from the Cloud Analytics Application.
+        Get the machines on monitoring state and power on from the Machine Manager.
 
-        :return: List of machines on monitoring state
+        :return: List of machines on monitoring state and energy status on
         :rtype: list[Machine]
         """
         # Create a list to store the machines
@@ -60,7 +60,9 @@ class MonitoringController(object):
         machine_schema_list = []
 
         # Get the machines from the Machine Manager (List of Machine models)
-        machine_model_list = self.machine_manager.get_machines(monitoring=True)
+        machine_model_list = self.machine_manager.get_machines(
+            monitoring=True, energy_status=True
+        )
 
         # Convert the list of Machine models to a list of Machine schemas
         for machine in machine_model_list:
@@ -71,7 +73,9 @@ class MonitoringController(object):
 
     def notify_update_monitoring(self):
         """Notify to the CloudAnalyticsManager a machine update."""
-        self.cloud_analytics_manager.machines_monitoring = self.machines_on_monitoring()
+        self.cloud_analytics_manager.machines_monitoring = (
+            self.machines_monitoring_and_on()
+        )
 
     def notify_new_metrics(self, metrics: dict):
         """Notify to the ActionsController a new metrics update."""

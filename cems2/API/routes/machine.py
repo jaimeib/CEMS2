@@ -120,6 +120,54 @@ class MachineManager(object):
 
         return machine
 
+    def update_machine_status_by_hostname(self, hostname: str, energy_status: bool):
+        """Update the energy status of the machine in the database by its hostname.
+
+        :param hostname: The hostname of the machine
+        :type hostname: str
+
+        :param energy_status: The energy status of the machine
+        :type energy_status: bool
+
+        :return: The updated machine
+        :rtype: Machine (Model)
+        """
+        # Get the database session
+        db_session = next(get_db())
+
+        # Get the machine from the database
+        machine_model = (
+            db_session.query(Machines).filter(Machines.hostname == hostname).first()
+        )
+
+        # Check if the machine exists
+        if machine_model is None:
+            raise Exception(f"Machine with hostname: {hostname} not found")
+
+        # Check if there is not change in the energy status
+        if machine_model.energy_status == energy_status:
+            return machine_model
+
+        # Check if the machine is available to update the status
+        if machine_model.available:
+            machine_model.energy_status = energy_status
+        else:
+            raise Exception(
+                f"Machine with hostname: {hostname} not updated: is not available or being monitored"
+            )
+
+        # Update the machine in the database
+        db_session.add(machine_model)
+        db_session.commit()
+
+        # Log the machine status
+        LOG.critical(
+            f"Machine with hostname: {hostname} updated: energy status to {energy_status}"
+        )
+
+        # Return the machine updated
+        return machine_model
+
 
 # Create the machine manager
 machine_manager = MachineManager()
@@ -286,126 +334,6 @@ def _get_machine_by_hostname(hostname: str, db_session: Session = Depends(get_db
 
 
 @machines.patch(
-    "/machines/id={id}/status",
-    response_model=Machine,
-    status_code=status.HTTP_200_OK,
-    summary="Update a machine energy status by its ID",
-    responses={
-        404: {"description": "Machine not found by ID", "model": Message},
-        400: {
-            "description": "Machine is not available or not being monitored",
-            "model": Message,
-        },
-    },
-)
-def _update_machine_status(
-    id: str, energy_status: bool, db_session: Session = Depends(get_db)
-):
-    """Update a machine energy status by its ID.
-
-    **Raises:**
-    - **HTTPException: 404**: If the machine does not exist by its ID
-    - **HTTPException: 400**: If the machine is not available or not being monitored
-
-    **Returns:** The updated machine
-    """
-    # Get the machine from the database
-    machine_model = db_session.query(Machines).filter(Machines.id == id).first()
-
-    # Check if the machine exists
-    if machine_model is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine with ID: {id} not found",
-        )
-
-    # Check if there is not change in the energy status
-    if machine_model.energy_status == energy_status:
-        return machine_model
-
-    # Check if the machine is available and being monitored to update the energy status
-    if machine_model.available and machine_model.monitoring:
-        machine_model.energy_status = energy_status
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Machine with ID: {id} not updated: is not available or not being monitored",
-        )
-
-    # Update the machine in the database
-    db_session.add(machine_model)
-    db_session.commit()
-
-    # Log the machine status update
-    LOG.critical(f"Machine with ID: {id} updated: energy status is {energy_status}")
-
-    # Return the machine updated
-    return machine_model
-
-
-@machines.patch(
-    "/machines/hostname={hostname}/status",
-    response_model=Machine,
-    status_code=status.HTTP_200_OK,
-    summary="Update a machine energy status by its hostname",
-    responses={
-        404: {"description": "Machine not found by hostname", "model": Message},
-        400: {
-            "description": "Machine is not available or not being monitored",
-            "model": Message,
-        },
-    },
-)
-def _update_machine_status_by_hostname(
-    hostname: str, energy_status: bool, db_session: Session = Depends(get_db)
-):
-    """Update a machine energy status by its hostname.
-
-    **Raises:**
-    - HTTPException: 404 - If the machine does not exist by hostname
-    - HTTPException: 400 - If the machine is not available or not being monitored
-
-    **Returns:** The updated machine
-    """
-    # Get the machine from the database
-    machine_model = (
-        db_session.query(Machines).filter(Machines.hostname == hostname).first()
-    )
-
-    # Check if the machine exists
-    if machine_model is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Machine with hostname: {hostname} not found",
-        )
-
-    # Check if there is not change in the energy status
-    if machine_model.energy_status == energy_status:
-        return machine_model
-
-    # Check if the machine is available and being monitored to update the status
-    if machine_model.available and machine_model.monitoring:
-        machine_model.energy_status = energy_status
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Machine with ID: {hostname} not updated: is not available or not being monitored",
-        )
-
-    # Update the machine in the database
-    db_session.add(machine_model)
-    db_session.commit()
-
-    # Log the machine status
-    LOG.critical(
-        f"Machine with hostname: {hostname} updated: energy status to {energy_status}"
-    )
-
-    # Return the machine updated
-    return machine_model
-
-
-@machines.patch(
     "/machines/id={id}/monitoring",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
@@ -459,11 +387,11 @@ def _update_machine_monitoring(
     # Log the machine monitoring update
     LOG.warning(f"Machine with ID: {id} monitoring updated to: {monitoring}")
 
-    # Notify the machine monitoring update to the monitoring controller
-    machine_manager.monitoring_controller.notify_update_monitoring()
-
     # Notify the machine monitoring update to the actions controller
     machine_manager.actions_controller.notify_update_monitoring()
+
+    # Notify the machine monitoring update to the monitoring controller
+    machine_manager.monitoring_controller.notify_update_monitoring()
 
     # Return the machine updated
     return machine_model
@@ -527,11 +455,11 @@ def _update_machine_monitoring_by_hostname(
         f"Machine with hostname: {hostname} monitoring updated to: {monitoring}"
     )
 
-    # Notify the machine monitoring update to the monitoring controller
-    machine_manager.monitoring_controller.notify_update_monitoring()
-
     # Notify the machine monitoring update to the actions controller
     machine_manager.actions_controller.notify_update_monitoring()
+
+    # Notify the machine monitoring update to the monitoring controller
+    machine_manager.monitoring_controller.notify_update_monitoring()
 
     # Return the machine updated
     return machine_model

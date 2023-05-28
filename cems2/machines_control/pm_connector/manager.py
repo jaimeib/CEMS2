@@ -2,6 +2,7 @@
 
 from cems2 import config_loader, log
 from cems2.machines_control import plugin_loader
+from cems2.schemas.machine import Machine
 
 # Get the logger
 LOG = log.get_logger(__name__)
@@ -33,6 +34,41 @@ class Manager(object):
         ]
         self.pm_connectors = pm_connectors
         LOG.debug("Physical Machines Connectors loaded: %s", pm_connectors_list)
+
+    def get_pm_state(self, pm: Machine):
+        """Get the state of a Physical Machine.
+
+        :param pm: Physical Machine to get the state of
+        :type pm: Machine
+        :return: The state of the Physical Machine
+        :rtype: str
+        """
+        # Find the connector for the physical machine
+        for pm_connector_name, pm_connector_plugin in self.pm_connectors:
+            if pm_connector_name == pm.connector:
+                break
+
+        # If the connector is not found, raise an exception
+        if pm_connector_plugin is None:
+            LOG.error(
+                "Physical Machines Connector plugin '%s' is not installed",
+                pm.connector,
+            )
+            raise Exception(
+                f"Physical Machines Connector plugin '{pm.connector}' is not installed."
+            )
+
+        # Get the power state of the machine
+        LOG.debug("Getting power state of %s", pm.hostname)
+        status = pm_connector_plugin().get_power_state(
+            pm.management_ip,
+            pm.management_username,
+            pm.management_password,
+            pm.brand_model,
+        )
+
+        # Return the state
+        return status
 
     def get_installed_plugins(self):
         """Get the list of installed Physical Machines connectors.

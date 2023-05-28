@@ -30,7 +30,7 @@ class Manager(object):
         """Initialize the manager."""
 
         # API Controller
-        self.controller = monitoring_controller
+        self.api_controller = monitoring_controller
 
         # Submanagers
         self.collector = None
@@ -51,6 +51,7 @@ class Manager(object):
 
     @property
     def machines_monitoring(self):
+        """Get the machines to monitor."""
         return self._machines_monitoring
 
     @machines_monitoring.setter
@@ -69,6 +70,7 @@ class Manager(object):
 
     @property
     def running(self):
+        """Get the running status of the manager."""
         return self._running
 
     @running.setter
@@ -118,8 +120,8 @@ class Manager(object):
             if self.machines_monitoring and self.running:
                 # Run the monitoring async function
                 trio.run(self._monitoring)
-                # Notify the monitoring controller of the new metrics obtained
-                self.controller.notify_new_metrics(self.metrics)
+                # Notify the monitoring API controller of the new metrics obtained
+                self.api_controller.notify_new_metrics(self.metrics)
                 # Wait the monitoring interval
                 LOG.debug("Waiting %s seconds", self.monitoring_interval)
                 time.sleep(self.monitoring_interval)

@@ -7,6 +7,8 @@ import cems2.machines_control.pm_optimization.manager as pm_optimization_manager
 import cems2.machines_control.vm_connector.manager as vm_connector_manager
 import cems2.machines_control.vm_optimization.manager as vm_optimization_manager
 from cems2 import config_loader, log
+from cems2.API.routes.actions import actions_controller
+from cems2.schemas.machine import Machine
 from cems2.schemas.plugin import Plugin
 
 # Get the logger
@@ -29,6 +31,9 @@ class Manager(object):
     def __init__(self):
         """Initialize the manager."""
 
+        # API controller
+        self.api_controller = actions_controller
+
         # Submanagers
         self.vm_optimization = None
         self.pm_optimization = None
@@ -36,13 +41,14 @@ class Manager(object):
         self.pm_connector = None
 
         # List of physical machines to control
-        self._physical_machines = None
+        self._pm_monitoring = None
 
         # On/off switch
         self._running = None
 
     @property
     def running(self):
+        """Get the running status of the manager."""
         return self._running
 
     @running.setter
@@ -60,21 +66,22 @@ class Manager(object):
             LOG.warning("Machines Control Manager stopped")
 
     @property
-    def physical_machines(self):
-        return self._physical_machines
+    def pm_monitoring(self):
+        """Get the list of physical machines to control."""
+        return self._pm_monitoring
 
-    @physical_machines.setter
-    def physical_machines(self, machines_list: list):
+    @pm_monitoring.setter
+    def pm_monitoring(self, machines_list: list):
         """Update the list of physical machines.
 
         :param machines_list: list of physical machines
         :type machines_list: list
         """
 
-        self._physical_machines = machines_list
+        self._pm_monitoring = machines_list
         LOG.info(
             "Physical machines to control: %s",
-            [machine.hostname for machine in self.physical_machines],
+            [machine.hostname for machine in self.pm_monitoring],
         )
 
     def _load_managers(self):
@@ -95,6 +102,9 @@ class Manager(object):
 
         # Load the managers
         self._load_managers()
+
+        # Set the current state of the physical machines
+        self.get_pms_energy_status()
 
         # Set the running status to True
         self.running = True
@@ -123,6 +133,31 @@ class Manager(object):
     def boot_all(self):
         """Boot all the physical machines."""
         LOG.critical("Booting all the physical machines")
+
+    def get_pms_energy_status(self):
+        """Get the energy status of the physical machines."""
+        LOG.debug("Setting the current state of the physical machines available")
+
+        # Get the list of physical machines available from the API controller
+        available_pms = self.api_controller.machines_available()
+
+        for machine in available_pms:
+            machine.energy_status = self.get_current_state(machine)
+
+        # Notify the API controller of the current state of the physical machines
+        self.api_controller.notify_machine_status(available_pms)
+
+    def get_current_state(self, machine: Machine):
+        """Get the current state of the physical machine.
+
+        :param machine: physical machine
+        :type machine: Machine
+
+        :return: current state of the physical machine (on/off)
+        :rtype: bool
+        """
+        # Get the state from the pm_connector
+        return self.pm_connector.get_pm_state(machine)
 
     def get_plugins(self):
         """Obtain the installed plugins.

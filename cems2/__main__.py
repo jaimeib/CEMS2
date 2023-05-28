@@ -79,7 +79,7 @@ async def main():
 
     # Update the machines_monitoring list in the cloud_analytics_manager
     cloud_analytics_manager.machines_monitoring = (
-        monitoring_controller.machines_on_monitoring()
+        monitoring_controller.machines_monitoring_and_on()
     )
 
     # Load the monitoring controller to the actions manager
@@ -96,7 +96,7 @@ async def main():
 
     # Update the physical_machines list in the machines_control_manager
     machines_control_manager.physical_machines = (
-        monitoring_controller.machines_on_monitoring()
+        actions_controller.machines_monitoring()
     )
 
     # Create 3 tasks to run in parallel

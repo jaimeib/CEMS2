@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+* Updated requirements.txt
+* Communicated all the controllers and all the managers
+* Better test plugins with random sleeps to simulate real system
+* Added support to specify the connector in the machines yaml file
+* Cloud analytics monitoring using multiple async task
 * Created Cloud Analytics test plugins
 * Restructured API managers & controllers using 3 classes to implement them
 * Actions controller connected to Machines Control Manager + Added API endpoints to obtain plugins with filtering

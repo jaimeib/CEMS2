@@ -1,8 +1,9 @@
 """API endpoints for the actions controller."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 
 from cems2 import log
+from cems2.schemas.machine import Machine
 from cems2.schemas.message import Message
 from cems2.schemas.plugin import Plugin
 
@@ -46,11 +47,51 @@ class ActionsController(object):
         """
         self.monitoring_controller = monitoring_controller
 
+    def machines_monitoring(self):
+        """
+        Get the machines on monitoring state from the Machine Manager.
+
+        :return: List of machines on monitoring state
+        :rtype: list[Machine]
+        """
+        # Create a list to store the machines
+        machine_model_list = []
+        machine_schema_list = []
+
+        # Get the machines from the Machine Manager (List of Machine models)
+        machine_model_list = self.machine_manager.get_machines(monitoring=True)
+
+        # Convert the list of Machine models to a list of Machine schemas
+        for machine in machine_model_list:
+            machine_schema_list.append(Machine.from_orm(machine))
+
+        # Return the list of machines
+        return machine_schema_list
+
+    def machines_available(self):
+        """
+        Get the machines available from the Machine Manager.
+
+        :return: List of machines available
+        :rtype: list[Machine]
+        """
+        # Create a list to store the machines
+        machine_model_list = []
+        machine_schema_list = []
+
+        # Get the machines from the Machine Manager (List of Machine models)
+        machine_model_list = self.machine_manager.get_machines(available=True)
+
+        # Convert the list of Machine models to a list of Machine schemas
+        for machine in machine_model_list:
+            machine_schema_list.append(Machine.from_orm(machine))
+
+        # Return the list of machines
+        return machine_schema_list
+
     def notify_update_monitoring(self):
         """Notify the update of the monitoring."""
-        self.machine_manager.physical_machines = (
-            self.monitoring_controller.get_machines_on_monitoring()
-        )
+        self.machines_control_manager.pm_monitoring = self.machines_monitoring()
 
     def new_metrics(self, metrics: dict):
         """Get the new metrics from the monitoring controller.
@@ -59,6 +100,22 @@ class ActionsController(object):
         :type metrics: dict
         """
         self.machines_control_manager.new_metrics(metrics)
+
+    def notify_machine_status(self, machine_list: list[Machine]):
+        """Notify the status of a machine to the machine manager.
+
+        :param machine_list: list of machines
+        :type machine_list: list[Machine]
+        """
+        # For each machine in the list
+        for machine in machine_list:
+            # Update the energy status using the machine manager
+            self.machine_manager.update_machine_status_by_hostname(
+                machine.hostname, machine.energy_status
+            )
+
+        # Notify the monitoring controller about the new status
+        self.monitoring_controller.notify_update_monitoring()
 
 
 # Create the actions controller
