@@ -2,6 +2,8 @@
 
 import time
 
+import trio
+
 import cems2.machines_control.pm_connector.manager as pm_connector_manager
 import cems2.machines_control.pm_optimization.manager as pm_optimization_manager
 import cems2.machines_control.vm_connector.manager as vm_connector_manager
@@ -45,6 +47,14 @@ class Manager(object):
 
         # On/off switch
         self._running = None
+
+        # Async tasks
+        self._vm_running_task = None
+        self._pm_running_task = None
+
+        # New metrics event triggers
+        # self.new_metrics_event_vm = trio.Event()
+        self.new_metrics_event_pm = False  # FIXME: Using a trio.Event() here
 
     @property
     def running(self):
@@ -90,6 +100,24 @@ class Manager(object):
         self.vm_connector = vm_connector_manager.Manager()
         self.pm_connector = pm_connector_manager.Manager()
 
+    def _set_baseline(self):
+        """Set the baseline for the physical machines.
+
+        The baseline is the minimum number of physical machines
+        that must be on to supply the future demand.
+        """
+        LOG.debug("Setting the baseline for the physical machines")
+
+        # Get the configured baseline in % from the configuration file
+        percent_baseline = int(CONFIG["machines_control"]["baseline"])
+
+        # Calculate the baseline in number of physical machines
+        # (round up to the nearest integer)
+        numeric_baseline = round(len(self.pm_monitoring) * percent_baseline / 100)
+
+        # Set the baseline to the pm_optimization manager
+        self.pm_optimization.pm_baseline = numeric_baseline
+
     def run(self):
         """Run the machines_control manager.
 
@@ -104,21 +132,111 @@ class Manager(object):
         self._load_managers()
 
         # Set the current state of the physical machines
-        self.get_pms_energy_status()
+        self._get_pms_energy_status()
+
+        # Set the baseline for the physical machines
+        self._set_baseline()
 
         # Set the running status to True
         self.running = True
 
+        # Run the tasks concurrently
+        trio.run(self.control_tasks)
+
         while True:
-            if self.running:
-                print("Machines Control Manager running...")
-                time.sleep(1)
-            else:
+            if not self.running:
                 # Boot all the physical machines
-                self.boot_all()
+                self._boot_all()
+                # Cancel the async tasks
+                # self._vm_control_task.cancel()
+                self._pm_running_task.cancel()
+                LOG.debug("Manager control tasks canceled")
+
                 # Wait until the running status is set to True
                 while not self.running:
                     time.sleep(1)
+
+    async def control_tasks(self):
+        async with trio.open_nursery() as nursery:
+            # nursery.start_soon(self._vm_control_task
+            nursery.start_soon(self._pm_control_task)
+
+    async def _vm_control_task(self):
+        """Control the Virtual Machines concurrently.
+
+        - Get the Virtual Machines optimization
+        - Apply the Virtual Machines optimization
+        """
+        # Run the task indefinitely
+        while True:
+            # Await the event to be true
+            await self.new_metrics_event_vm.wait()
+
+            # Get the best Virtual Machines optimization
+            vm_optimization = self.vm_optimization.get_best_optimization()
+
+            # Apply the best Virtual Machines optimization
+            self.vm_connector.apply_optimization(vm_optimization)
+
+            # Notify the API controller to analyze the current state of the physical machines
+            self.api_controller.notify_new_vm_optimization()
+
+            # Reset the event
+            self.new_metrics_event_vm.clear()
+
+    async def _pm_control_task(self):
+        """Control the Physical Machines concurrently.
+
+        - Get the Physical Machines optimization
+        - Apply the Physical Machines optimization
+        """
+        # Run the task indefinitely
+        while True:
+            # Wait until the event is true FIXME: Using a trio.Event() here
+            while not self.new_metrics_event_pm:
+                await trio.sleep(1)
+
+            # Get the best Physical Machines optimization
+            pm_optimization_hostnames = self.pm_optimization.get_best_optimization()
+
+            # Convert the dict of hostnames to a dict of Machine objects
+            pm_optimization_machines = self._convert_pm_optimization(
+                pm_optimization_hostnames
+            )
+
+            # Apply the best Physical Machines optimization
+            self.pm_connector.apply_optimization(pm_optimization_machines)
+
+            # Update the current state of the physical machines on the API controller
+            self._get_pms_energy_status()
+
+            # Reset the event
+            self.new_metrics_event_pm = False
+
+    def _convert_pm_optimization(self, pm_optimization: dict):
+        """Convert the Physical Machines optimization from hostnames to Machine objects.
+
+        :param pm_optimization: Physical Machines optimization
+        :type pm_optimization: dict
+
+        :return: Physical Machines optimization with Machine objects
+        :rtype: dict
+        """
+        pm_optimization_machines = {"on": [], "off": []}
+
+        for hostname in pm_optimization["on"]:
+            for machine in self.pm_monitoring:
+                if machine.hostname == hostname:
+                    pm_optimization_machines["on"].append(machine)
+                    break
+
+        for hostname in pm_optimization["off"]:
+            for machine in self.pm_monitoring:
+                if machine.hostname == hostname:
+                    pm_optimization_machines["off"].append(machine)
+                    break
+
+        return pm_optimization_machines
 
     def new_metrics(self, metrics: dict):
         """Get the last metrics from the monitoring controller.
@@ -126,15 +244,32 @@ class Manager(object):
         :param metrics: last metrics
         :type metrics: dict
         """
+        LOG.debug("New metrics received on the Machines Control Manager")
 
-        print("Machines Control Manager: New metrics received")
-        print(metrics)
+        # Update the metrics on the optimization managers
+        # self.vm_optimization.metrics = metrics
+        self.pm_optimization.pm_metrics = metrics
 
-    def boot_all(self):
+        # Activate the events to start the optimization process
+        # self.new_metrics_event_vm.set()
+        self.new_metrics_event_pm = True  # FIXME: Using a trio.Event() here
+
+        LOG.critical("New metrics event activated")
+
+    def _boot_all(self):
         """Boot all the physical machines."""
         LOG.critical("Booting all the physical machines")
 
-    def get_pms_energy_status(self):
+        # Get the list of physical machines available from the API controller
+        available_pms = self.api_controller.machines_available()
+
+        for machine in available_pms:
+            self.pm_connector.turn_on(machine)
+
+        # Notify the API controller of the current state of the physical machines
+        self.api_controller.notify_machine_status(available_pms)
+
+    def _get_pms_energy_status(self):
         """Get the energy status of the physical machines."""
         LOG.debug("Setting the current state of the physical machines available")
 
@@ -142,12 +277,12 @@ class Manager(object):
         available_pms = self.api_controller.machines_available()
 
         for machine in available_pms:
-            machine.energy_status = self.get_current_state(machine)
+            machine.energy_status = self._get_current_state(machine)
 
         # Notify the API controller of the current state of the physical machines
         self.api_controller.notify_machine_status(available_pms)
 
-    def get_current_state(self, machine: Machine):
+    def _get_current_state(self, machine: Machine):
         """Get the current state of the physical machine.
 
         :param machine: physical machine

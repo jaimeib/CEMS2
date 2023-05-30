@@ -95,9 +95,7 @@ async def main():
     actions_controller.set_machines_control_manager(machines_control_manager)
 
     # Update the physical_machines list in the machines_control_manager
-    machines_control_manager.physical_machines = (
-        actions_controller.machines_monitoring()
-    )
+    machines_control_manager.pm_monitoring = actions_controller.machines_monitoring()
 
     # Create 3 tasks to run in parallel
     async with trio.open_nursery() as nursery:

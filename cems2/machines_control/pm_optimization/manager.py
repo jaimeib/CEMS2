@@ -15,6 +15,12 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the Physical Machines optimization manager."""
+        # Physical Machines baseline
+        self.pm_baseline = None
+
+        # Physical Machines last metrics
+        self.pm_metrics = None
+
         # Obtain the list of Physical Machines optimizations configured in the config file
         pm_optimizations_list = CONFIG.getlist(
             "machines_control.plugins", "pm_optimization"
@@ -37,6 +43,26 @@ class Manager(object):
         ]
         self.pm_optimizations = pm_optimizations
         LOG.debug("Physical Machines Optimizations loaded: %s", pm_optimizations_list)
+
+    def get_best_optimization(self):
+        """Get the best Physical Machines optimization.
+
+        The optimization is represented by a dict with 2 lists:
+        - key = "on" -> list of Physical Machines to turn on
+        - key = "off" -> list of Physical Machines to turn off
+
+        :return: The best Physical Machines optimization
+        :rtype: dict
+        """
+
+        # Initialize the best optimization
+        best_optimization = {"on": [], "off": []}
+
+        # Put all the hostnames in the metrics on on list
+        for hostname in self.pm_metrics.keys():
+            best_optimization["on"].append(hostname)
+
+        return best_optimization
 
     def get_installed_plugins(self):
         """Get the list of installed Physical Machines optimizations.
