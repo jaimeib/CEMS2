@@ -8,6 +8,9 @@ from cems2.machines_control.pm_connector.base import PMConnectorBase
 # Get the logger
 LOG = log.get_logger(__name__)
 
+ON = True
+OFF = False
+
 
 class Test(PMConnectorBase):
     """Allows to test ."""
@@ -25,5 +28,4 @@ class Test(PMConnectorBase):
 
     def get_power_state(self, m_ip, m_username, m_password, brand_name):
         """Get the power state of the machine."""
-        # Generate ramdom power state
-        return random.randint(0, 1)
+        return random.choice([ON, OFF])

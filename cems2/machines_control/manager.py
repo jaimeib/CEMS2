@@ -48,10 +48,6 @@ class Manager(object):
         # On/off switch
         self._running = None
 
-        # Async tasks
-        self._vm_running_task = None
-        self._pm_running_task = None
-
         # New metrics event triggers
         # self.new_metrics_event_vm = trio.Event()
         self.new_metrics_event_pm = False  # FIXME: Using a trio.Event() here
@@ -140,23 +136,37 @@ class Manager(object):
         # Set the running status to True
         self.running = True
 
-        # Run the tasks concurrently
-        trio.run(self.control_tasks)
+        # Run the manager asynchronously
+        trio.run(self._run_async)
 
+    async def _run_async(self):
+        """Run the machines_control manager asynchronously"""
+        # Create 2 tasks to run in parallel: Running control and Control tasks
+        async with trio.open_nursery() as nursery:
+            # Start the running control task
+            nursery.start_soon(self._running_control_task)
+            # Start the control tasks
+            nursery.start_soon(self._control_tasks)
+
+    async def _running_control_task(self):
+        """Control the running status of the manager."""
+        # Run the task indefinitely
         while True:
+            # If the running status is set to False
             if not self.running:
                 # Boot all the physical machines
                 self._boot_all()
-                # Cancel the async tasks
-                # self._vm_control_task.cancel()
-                self._pm_running_task.cancel()
                 LOG.debug("Manager control tasks canceled")
 
                 # Wait until the running status is set to True
                 while not self.running:
-                    time.sleep(1)
+                    print("Waiting for the manager to be called again")
+                    await trio.sleep(1)
+            else:
+                # Wait 1 second
+                await trio.sleep(1)
 
-    async def control_tasks(self):
+    async def _control_tasks(self):
         async with trio.open_nursery() as nursery:
             # nursery.start_soon(self._vm_control_task
             nursery.start_soon(self._pm_control_task)
@@ -244,7 +254,8 @@ class Manager(object):
         :param metrics: last metrics
         :type metrics: dict
         """
-        LOG.debug("New metrics received on the Machines Control Manager")
+        if not self.running:
+            return
 
         # Update the metrics on the optimization managers
         # self.vm_optimization.metrics = metrics
@@ -254,7 +265,7 @@ class Manager(object):
         # self.new_metrics_event_vm.set()
         self.new_metrics_event_pm = True  # FIXME: Using a trio.Event() here
 
-        LOG.critical("New metrics event activated")
+        LOG.critical("New metrics event activated - Resuming control tasks")
 
     def _boot_all(self):
         """Boot all the physical machines."""
