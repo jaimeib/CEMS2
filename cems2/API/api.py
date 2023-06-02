@@ -12,7 +12,6 @@ from fastapi import FastAPI
 from cems2 import config_loader
 from cems2.API.database.loader import load_hosts
 from cems2.API.routes.actions import actions
-from cems2.API.routes.login import login
 from cems2.API.routes.machine import machines
 from cems2.API.routes.monitoring import monitoring
 
@@ -28,9 +27,6 @@ api = FastAPI(
 
 # Load the initial data .yaml file into the database
 load_hosts(CONFIG.get("data", "file"))
-
-# Include the login router
-api.include_router(login, tags=["Log In Controller"])
 
 # Include the machines manager router
 api.include_router(machines, tags=["Machine Manager"])
