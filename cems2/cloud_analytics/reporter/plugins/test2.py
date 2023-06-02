@@ -1,4 +1,4 @@
-"""Metric reporter test plug-in."""
+"""Metric reporter test2 plug-in."""
 
 import random
 
@@ -11,7 +11,7 @@ from cems2.cloud_analytics.reporter.base import MetricReporterBase
 LOG = log.get_logger(__name__)
 
 
-class Test(MetricReporterBase):
+class Test2(MetricReporterBase):
     """Allows to test the report the metrics."""
 
     def __init__(self):
@@ -21,6 +21,6 @@ class Test(MetricReporterBase):
         """Report the metric."""
 
         # Simulate a delay in the reporting of the metric
-        await trio.sleep(random.randint(1, 5))
+        await trio.sleep(random.randint(5, 15))
 
         print("Test-Reporter:", metric_list)

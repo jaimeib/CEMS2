@@ -18,7 +18,7 @@ class Manager(object):
     def __init__(self):
         """Initialize the collector manager."""
         # Obtain the list of collectors configured in the config file
-        collectors_list = CONFIG.getlist("cloud_analytics.plugins", "collector")
+        collectors_list = CONFIG.getlist("cloud_analytics.plugins", "collectors")
 
         # Check if the collectors are installed
         for collector in collectors_list:
@@ -34,6 +34,9 @@ class Manager(object):
         self.collectors = collectors
         LOG.debug("Collectors loaded: %s", collectors_list)
 
+        # Set the collector plugin timeout
+        self.timeout = CONFIG.getint("cloud_analytics", "collector_timeout")
+
     async def get_metrics(self, machine_id):
         """Get the metric list from the collectors for the instance.
 
@@ -45,16 +48,29 @@ class Manager(object):
         """
         metric_list = []
 
-        # Create an async task for each collector
-        async with trio.open_nursery() as nursery:
-            for collector_name, collector_cls in self.collectors:
-                nursery.start_soon(
-                    self._obtain_metrics, collector_cls, machine_id, metric_list
+        for collector_name, collector_cls in self.collectors:
+            # Create an async task for each collector and set a timeout
+            with trio.move_on_after(self.timeout) as cancel_scope:
+                async with trio.open_nursery() as nursery:
+                    nursery.start_soon(
+                        self._obtain_metrics, collector_cls, machine_id, metric_list
+                    )
+
+            if cancel_scope.cancelled_caught:
+                LOG.error(
+                    "Timeout reached for the collector '%s' from the machine %s",
+                    collector_name,
+                    machine_id,
                 )
 
         return metric_list
 
     async def _obtain_metrics(self, collector, machine_id, metric_list):
+        LOG.info(
+            "Collecting metrics from '%s', from the machine %s",
+            collector.__name__,
+            machine_id,
+        )
         metric = await collector().collect_metric(machine_id)
         metric_list.append(metric)
 

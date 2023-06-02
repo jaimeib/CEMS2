@@ -68,6 +68,11 @@ class Manager(object):
             [machine.hostname for machine in self.machines_monitoring],
         )
 
+        # If the machines list is not empty
+        if self.machines_monitoring:
+            # Set the running status to True to start the manager
+            self.running = True
+
     @property
     def running(self):
         """Get the running status of the manager."""
@@ -111,9 +116,6 @@ class Manager(object):
 
         # Set the monitoring interval
         self._set_monitoring_interval()
-
-        # Set the running status to True
-        self.running = True
 
         # Run periodically as the monitoring interval
         while True:

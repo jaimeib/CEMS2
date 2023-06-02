@@ -21,7 +21,6 @@ class Test(MetricCollectorBase):
 
     async def collect_metric(self, machine_id):
         """Collect a metric."""
-        LOG.info("Collecting test metric from the machine %s", machine_id)
 
         # Simulate a delay in the collection of the metric
         await trio.sleep(random.randint(1, 5))

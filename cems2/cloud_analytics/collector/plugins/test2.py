@@ -1,4 +1,4 @@
-"""Metric collector test 2 plug-in."""
+"""Metric collector test2 plug-in."""
 
 import random
 from datetime import datetime
@@ -21,10 +21,9 @@ class Test2(MetricCollectorBase):
 
     async def collect_metric(self, machine_id):
         """Collect a metric."""
-        LOG.info("Collecting test2 metric from the machine %s", machine_id)
 
         # Simulate a delay in the collection of the metric
-        await trio.sleep(random.randint(1, 5))
+        await trio.sleep(random.randint(5, 15))
 
         # Generate a random float value between 0 and 100 and round it to 3 decimals
         value = round(random.uniform(1000, 2000), 3)

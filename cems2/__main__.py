@@ -15,33 +15,39 @@ from cems2.machines_control.manager import Manager as MachinesControlManager
 
 LOG = log.get_logger(__name__)
 
+api_cancel_scope = trio.CancelScope()
+cloud_analytics_manager_cancel_scope = trio.CancelScope()
+machines_control_manager_cancel_scope = trio.CancelScope()
+
 
 async def start_api():
     """Start the API server."""
-    LOG.info("Starting API server")
+    with api_cancel_scope:
+        LOG.info("Starting API server")
 
-    # Run the API server in a separate thread
-    await trio.to_thread.run_sync(
-        partial(uvicorn.run, api.api, host="localhost", port=8000)
-    )
-
-    # If the API server stops, log it
-    LOG.error("API server stopped")
+        # Run the API server in a separate thread
+        await trio.to_thread.run_sync(
+            partial(uvicorn.run, api.api, host="localhost", port=8000)
+        )
+        # If the API server stops, log it
+        LOG.error("API server stopped")
 
 
 async def start_cloud_analytics_manager(cloud_analytics_manager):
     """Start the Cloud Analytics Manager."""
-    LOG.info("Starting Cloud Analytics Manager")
+    with cloud_analytics_manager_cancel_scope:
+        LOG.info("Starting Cloud Analytics Manager")
 
-    # Run the Cloud Analytics Manager in a separate thread
-    await trio.to_thread.run_sync(cloud_analytics_manager.run)
+        # Run the Cloud Analytics Manager in a separate thread
+        await trio.to_thread.run_sync(cloud_analytics_manager.run)
 
-    # If the Cloud Analytics Manager stops, log it
-    LOG.error("Cloud Analytics Manager stopped")
+        # If the Cloud Analytics Manager stops, log it
+        LOG.error("Cloud Analytics Manager stopped")
 
 
 async def start_machines_control_manager(machines_control_manager):
     """Start the Machine Control Manager."""
+
     LOG.info("Starting Machine Control Manager")
 
     # Run the Machine Control Manager in a separate thread
@@ -77,11 +83,6 @@ async def main():
     # Load the cloud_analytics_manager to the monitoring manager
     monitoring_controller.set_cloud_analytics_manager(cloud_analytics_manager)
 
-    # Update the machines_monitoring list in the cloud_analytics_manager
-    cloud_analytics_manager.machines_monitoring = (
-        monitoring_controller.machines_monitoring_and_on()
-    )
-
     # Load the monitoring controller to the actions manager
     actions_controller.set_monitoring_controller(monitoring_controller)
 
@@ -94,9 +95,6 @@ async def main():
     # Load the machines_control_manager to the actions manager
     actions_controller.set_machines_control_manager(machines_control_manager)
 
-    # Update the physical_machines list in the machines_control_manager
-    machines_control_manager.pm_monitoring = actions_controller.machines_monitoring()
-
     # Create 3 tasks to run in parallel
     async with trio.open_nursery() as nursery:
         # Start the API (Task 1)
@@ -106,6 +104,21 @@ async def main():
         # Start the Machine Control Manager (Task 3)
         nursery.start_soon(start_machines_control_manager, machines_control_manager)
 
+
+import signal
+
+
+def shutdown():
+    # Cancel all tasks
+    api_cancel_scope.cancel()
+    cloud_analytics_manager_cancel_scope.cancel()
+    machines_control_manager_cancel_scope.cancel()
+    LOG.info("Shutting down CEMS2")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, shutdown)  # Register the shutdown function to the SIGTERM
+signal.signal(signal.SIGINT, shutdown)  # Register the shutdown function to the SIGINT
 
 if __name__ == "__main__":
     # Run the main function using Trio
