@@ -42,10 +42,10 @@
       - hostname: cloudB02
         management_ip: 10.128.2.10 #Specific IP
 
-- groupname: cloudC
-  brand_model: Dell
-  hostname_range: [cloudC01, cloudC05]
-  management_ip_range: [10.128.3.11, 10.128.3.15]
-  management_username: DellAdmin
-  management_password: DellPass
-  connector: test
+# - groupname: cloudC
+#   brand_model: Dell
+#   hostname_range: [cloudC01, cloudC05]
+#   management_ip_range: [10.128.3.11, 10.128.3.15]
+#   management_username: DellAdmin
+#   management_password: DellPass
+#   connector: test

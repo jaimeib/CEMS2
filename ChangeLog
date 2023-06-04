@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+* Added monitoring with timeouts and cleanup initialization
+* Remove login api endpoints
+* Added package cems2cli
+* Control the running status in all the subtasks
+* Added the control to power on/off dinamically
+* Shared the list of machines to monitor and to control among all managers and controllers
+* Added pm\_connector test
 * Updated requirements.txt
 * Communicated all the controllers and all the managers
 * Better test plugins with random sleeps to simulate real system

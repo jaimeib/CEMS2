@@ -12,4 +12,11 @@ class MetricCollectorBase(metaclass=ABCMeta):
 
     @abstractmethod
     async def collect_metric(self, machine_id):
-        """Collect the metric from the cloud platform."""
+        """Collect the metric from the cloud platform.
+
+        :param machine_id: The ID of the machine.
+        :type machine_id: str
+
+        :return: The metric.
+        :rtype: Metric
+        """

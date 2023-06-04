@@ -93,6 +93,10 @@ class ActionsController(object):
         """Notify the update of the monitoring."""
         self.machines_control_manager.pm_monitoring = self.machines_monitoring()
 
+    def monitor_again(self):
+        """Notify the monitoring controller to monitor again."""
+        self.monitoring_controller.monitor_again()
+
     def new_metrics(self, metrics: dict):
         """Get the new metrics from the monitoring controller.
 

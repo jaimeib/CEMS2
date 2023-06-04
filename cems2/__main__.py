@@ -1,5 +1,6 @@
 """CEMS2 Launcher."""
 
+import signal
 from functools import partial
 
 import trio
@@ -18,6 +19,19 @@ LOG = log.get_logger(__name__)
 api_cancel_scope = trio.CancelScope()
 cloud_analytics_manager_cancel_scope = trio.CancelScope()
 machines_control_manager_cancel_scope = trio.CancelScope()
+
+
+def shutdown():
+    # Cancel all tasks
+    api_cancel_scope.cancel()
+    cloud_analytics_manager_cancel_scope.cancel()
+    machines_control_manager_cancel_scope.cancel()
+    LOG.info("Shutting down CEMS2")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, shutdown)  # Register the shutdown function to the SIGTERM
+signal.signal(signal.SIGINT, shutdown)  # Register the shutdown function to the SIGINT
 
 
 async def start_api():
@@ -57,7 +71,7 @@ async def start_machines_control_manager(machines_control_manager):
     LOG.error("Machine Control Manager stopped")
 
 
-async def main():
+async def async_main():
     """Main function.
     - Start the API
     - Start the Cloud Analytics Manager
@@ -105,21 +119,11 @@ async def main():
         nursery.start_soon(start_machines_control_manager, machines_control_manager)
 
 
-import signal
+def main():
+    """Main function."""
+    # Run the async_main function using Trio
+    trio.run(async_main)
 
-
-def shutdown():
-    # Cancel all tasks
-    api_cancel_scope.cancel()
-    cloud_analytics_manager_cancel_scope.cancel()
-    machines_control_manager_cancel_scope.cancel()
-    LOG.info("Shutting down CEMS2")
-    sys.exit(0)
-
-
-signal.signal(signal.SIGTERM, shutdown)  # Register the shutdown function to the SIGTERM
-signal.signal(signal.SIGINT, shutdown)  # Register the shutdown function to the SIGINT
 
 if __name__ == "__main__":
-    # Run the main function using Trio
-    trio.run(main)
+    main()

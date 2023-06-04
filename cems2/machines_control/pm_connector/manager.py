@@ -1,5 +1,7 @@
 """Physical Machines Connector Manager module."""
 
+import trio
+
 from cems2 import config_loader, log
 from cems2.machines_control import plugin_loader
 from cems2.schemas.machine import Machine
@@ -20,8 +22,9 @@ class Manager(object):
     def __init__(self):
         """Initialize the Physical Machines connector manager."""
         # Obtain the list of Physical Machines connectors configured in the config file
-        pm_connectors_list = CONFIG.getlist("machines_control.plugins", "pm_connector")
+        pm_connectors_list = CONFIG.getlist("machines_control.plugins", "pm_connectors")
 
+        # Check if the Physical Machines connectors are installed
         for pm_connector in pm_connectors_list:
             if pm_connector not in plugin_loader.get_pm_connectors_names():
                 LOG.error(
@@ -31,6 +34,7 @@ class Manager(object):
                 raise Exception(
                     f"Physical Machines Connector plugin '{pm_connector}' is not installed."
                 )
+
         # Get the Physical Machines connectors from the plugin loader
         pm_connectors = [
             (i, plugin_loader.get_pm_connectors()[i]) for i in pm_connectors_list
@@ -38,20 +42,32 @@ class Manager(object):
         self.pm_connectors = pm_connectors
         LOG.debug("Physical Machines Connectors loaded: %s", pm_connectors_list)
 
-    def apply_optimization(self, optimization: dict):
+        # Set the Physical Machines connector plugin timeout
+        self.timeout = CONFIG.getint("machines_control", "pm_connector_timeout")
+
+    async def apply_optimization(self, optimization: dict):
         """Apply the Physical Machines optimization.
 
         :param optimization: The Physical Machines optimization to apply
         :type optimization: dict
         """
+        # Create an async task for each Physical Machine to turn on/off
+        # Use a timeout for each task
+        with trio.move_on_after(self.timeout) as cancel_scope:
+            async with trio.open_nursery() as nursery:
+                for pm in optimization["on"]:
+                    nursery.start_soon(self.turn_on, pm)
+                for pm in optimization["off"]:
+                    nursery.start_soon(self.turn_off, pm)
 
-        for pm in optimization["on"]:
-            self.turn_on(pm)
+        if cancel_scope.cancelled_caught:
+            LOG.error(
+                "Physical Machines optimization timeout for machine %s using connector %s",
+                pm.hostname,
+                pm.connector,
+            )
 
-        for pm in optimization["off"]:
-            self.turn_off(pm)
-
-    def turn_on(self, pm: Machine):
+    async def turn_on(self, pm: Machine):
         """Turn on a Physical Machine.
 
         :param pm: Physical Machine to turn on
@@ -61,20 +77,20 @@ class Manager(object):
         pm_connector_plugin = self._get_machine_connector(pm)
 
         # Check if the machine is already on
-        if self.get_pm_state(pm) == ON:
+        if pm.energy_status == ON:
             LOG.debug("%s is already on", pm.hostname)
             return
 
         # Turn on the machine
         LOG.debug("Turning on %s", pm.hostname)
-        pm_connector_plugin().power_on(
+        await pm_connector_plugin().power_on(
             pm.management_ip,
             pm.management_username,
             pm.management_password,
             pm.brand_model,
         )
 
-    def turn_off(self, pm: Machine):
+    async def turn_off(self, pm: Machine):
         """Turn off a Physical Machine.
 
         :param pm: Physical Machine to turn off
@@ -84,20 +100,20 @@ class Manager(object):
         pm_connector_plugin = self._get_machine_connector(pm)
 
         # Check if the machine is already off
-        if self.get_pm_state(pm) == OFF:
+        if pm.energy_status == OFF:
             LOG.debug("%s is already off", pm.hostname)
             return
 
         # Turn off the machine
         LOG.debug("Turning off %s", pm.hostname)
-        pm_connector_plugin().power_off(
+        await pm_connector_plugin().power_off(
             pm.management_ip,
             pm.management_username,
             pm.management_password,
             pm.brand_model,
         )
 
-    def get_pm_state(self, pm: Machine):
+    async def get_pm_state(self, pm: Machine):
         """Get the state of a Physical Machine.
 
         :param pm: Physical Machine to get the state of
@@ -110,8 +126,7 @@ class Manager(object):
         pm_connector_plugin = self._get_machine_connector(pm)
 
         # Get the power state of the machine
-        LOG.debug("Getting power state of %s", pm.hostname)
-        status = pm_connector_plugin().get_power_state(
+        status = await pm_connector_plugin().get_power_state(
             pm.management_ip,
             pm.management_username,
             pm.management_password,

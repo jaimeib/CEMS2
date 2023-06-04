@@ -16,7 +16,7 @@ class Manager(object):
     def __init__(self):
         """Initialize the Virtual Machines connector manager."""
         # Obtain the list of Virtual Machines connectors configured in the config file
-        vm_connectors_list = CONFIG.getlist("machines_control.plugins", "vm_connector")
+        vm_connectors_list = CONFIG.getlist("machines_control.plugins", "vm_connectors")
 
         # Check if the Virtual Machines connectors are installed
         for vm_connector in vm_connectors_list:

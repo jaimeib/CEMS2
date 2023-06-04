@@ -124,9 +124,20 @@ class Manager(object):
                 trio.run(self._monitoring)
                 # Notify the monitoring API controller of the new metrics obtained
                 self.api_controller.notify_new_metrics(self.metrics)
-                # Wait the monitoring interval
-                LOG.debug("Waiting %s seconds", self.monitoring_interval)
-                time.sleep(self.monitoring_interval)
+                # Set the running status to False
+                self.running = False
+                # Sleep the monitoring interval but check if the manager has to be started again
+                for _ in range(self.monitoring_interval):
+                    if self.running:
+                        break
+                    else:
+                        time.sleep(1)
+                # Set the running status to True to start the manager if it has not been started again
+                if not self.running:
+                    self.running = True
+            else:
+                # Sleep until the manager is started again
+                time.sleep(1)
 
     async def _monitoring(self):
         # Create an async task for each machine
@@ -138,6 +149,11 @@ class Manager(object):
         metrics = await self.collector.get_metrics(machine.hostname)
         self.metrics[machine.hostname] = metrics
         await self.reporter.send_metrics(metrics)
+
+    def monitor_again(self):
+        """Monitor again the machines."""
+        LOG.info("Monitoring again the machines")
+        self.running = True
 
     # Communication with de API monitoring controller
     def obtain_last_metrics(self):

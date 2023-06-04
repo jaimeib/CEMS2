@@ -11,5 +11,5 @@ class PMOptimizationBase(metaclass=ABCMeta):
         """."""
 
     @abstractmethod
-    def optimize(self, pm_list):
-        """Optimize the physical machines."""
+    async def run(self):
+        """Run the Physical Machines Optimization."""
