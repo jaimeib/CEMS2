@@ -13,3 +13,4 @@ class Metric(BaseModel):
     unit: str = Field(..., example="%")
     hostname: str = Field(min_length=2, max_length=50, example="host1")
     timestamp: datetime = Field(default=datetime.now())
+    collected_from: str = Field(min_length=1, max_length=50, example="OpenStack")

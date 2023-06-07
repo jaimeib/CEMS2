@@ -64,7 +64,7 @@ class Manager(object):
 
         self._machines_monitoring = machines_list
         LOG.info(
-            "Machines to monitor: %s",
+            "PMs to monitor: %s",
             [machine.hostname for machine in self.machines_monitoring],
         )
 
@@ -122,19 +122,16 @@ class Manager(object):
             if self.machines_monitoring and self.running:
                 # Run the monitoring async function
                 trio.run(self._monitoring)
+
                 # Notify the monitoring API controller of the new metrics obtained
                 self.api_controller.notify_new_metrics(self.metrics)
+
                 # Set the running status to False
                 self.running = False
-                # Sleep the monitoring interval but check if the manager has to be started again
-                for _ in range(self.monitoring_interval):
-                    if self.running:
-                        break
-                    else:
-                        time.sleep(1)
-                # Set the running status to True to start the manager if it has not been started again
-                if not self.running:
-                    self.running = True
+
+                # Wait for the monitoring interval
+                trio.run(self._wait_moniring_interval)
+
             else:
                 # Sleep until the manager is started again
                 time.sleep(1)
@@ -150,10 +147,22 @@ class Manager(object):
         self.metrics[machine.hostname] = metrics
         await self.reporter.send_metrics(metrics)
 
-    def monitor_again(self):
-        """Monitor again the machines."""
-        LOG.info("Monitoring again the machines")
-        self.running = True
+    async def _wait_moniring_interval(self):
+        # With a timeout of the monitoring interval
+        with trio.move_on_after(self.monitoring_interval) as cancel_scope:
+            # Create an async coroutine to wait for the manager to be started again
+            async with trio.open_nursery() as nursery:
+                nursery.start_soon(self._wait_for_monitoring)
+
+        # If the manager is not started again
+        if cancel_scope.cancelled_caught:
+            LOG.debug("Monitoring interval finished")
+            # Set the running status to True to start the manager again
+            self.running = True
+
+    async def _wait_for_monitoring(self):
+        while not self.running:
+            await trio.sleep(1)
 
     # Communication with de API monitoring controller
     def obtain_last_metrics(self):

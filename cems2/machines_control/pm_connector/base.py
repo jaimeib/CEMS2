@@ -1,14 +1,14 @@
-"""Base class for Physical Machines Connector plug-ins."""
+"""Base class for PMs Connector plug-ins."""
 
 from abc import ABCMeta, abstractmethod
 
 
 class PMConnectorBase(metaclass=ABCMeta):
-    """Allows to connect to the physical machines."""
+    """Allows to connect to the PMs."""
 
     @abstractmethod
     def __init__(self):
-        """Initialize the connection to the physical machines."""
+        """Initialize the connection to the PMs."""
 
     @abstractmethod
     async def power_on(self, m_ip, m_username, m_password, brand_name):

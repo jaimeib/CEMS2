@@ -139,10 +139,10 @@ def _get_plugins(type: str = None):
     """
     Get the plugins installed by the following types:
 
-    - **vm_optimization**: Virtual Machines optimization plugins
-    - **pm_optimization**: Physical Machines optimization plugins
-    - **vm_connector**: Virtual Machines connector plugins
-    - **pm_connector**: Physical Machines connector plugins
+    - **vm_optimization**: VMs optimization plugins
+    - **pm_optimization**: PMs optimization plugins
+    - **vm_connector**: VMs connector plugins
+    - **pm_connector**: PMs connector plugins
 
     **Returns**: A list of plugins
 

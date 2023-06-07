@@ -1,4 +1,4 @@
-"""Virtual Machines Optimization Manager module."""
+"""VM Optimization Manager module."""
 
 from cems2 import config_loader, log
 from cems2.machines_control import plugin_loader
@@ -11,42 +11,42 @@ CONFIG = config_loader.get_config()
 
 
 class Manager(object):
-    """Manager for the Virtual Machines Optimizations."""
+    """Manager for the VM Optimizations."""
 
     def __init__(self):
-        """Initialize the Virtual Machines optimization manager."""
-        # Obtain the default Virtual Machines optimization configured in the config file
+        """Initialize the VM optimization manager."""
+        # Obtain the default VM optimization configured in the config file
         default_vm_optimization_name = CONFIG.get(
             "machines_control.plugins", "default_vm_optimization"
         )
 
-        # Check if the default Virtual Machines optimization is installed
+        # Check if the default VM optimization is installed
         if (
             default_vm_optimization_name
             not in plugin_loader.get_vm_optimizations_names()
         ):
             LOG.error(
-                "Virtual Machines Optimization plugin '%s' is not installed.",
+                "VM Optimization plugin '%s' is not installed.",
                 default_vm_optimization_name,
             )
             raise Exception(
-                f"Virtual Machines Optimization plugin '{default_vm_optimization_name}' is not installed."
+                f"VM Optimization plugin '{default_vm_optimization_name}' is not installed."
             )
 
-        # Get the default Virtual Machines optimization from the plugin loader
+        # Get the default VM optimization from the plugin loader
         default_vm_optimization = plugin_loader.get_vm_optimizations()[
             default_vm_optimization_name
         ]
         self.default_vm_optimization = default_vm_optimization
         LOG.debug(
-            "Default Virtual Machines Optimizations loaded: %s",
+            "Default VM Optimizations loaded: %s",
             default_vm_optimization_name,
         )
 
-        # Get all the Virtual Machines optimizations from the plugin loader
+        # Get all the VM optimizations from the plugin loader
         self.vm_optimizations = plugin_loader.get_vm_optimizations()
         LOG.debug(
-            "Virtual Machines Optimizations loaded: %s",
+            "VM Optimizations loaded: %s",
             list(plugin_loader.get_vm_optimizations_names()),
         )
 
@@ -57,10 +57,10 @@ class Manager(object):
         :type new_metrics: dict
         """
 
-        # Pass the new metrics to the default Virtual Machines optimization
+        # Pass the new metrics to the default VM optimization
 
     async def get_default_optimization(self):
-        """Get the default Virtual Machines optimization.
+        """Get the default VM optimization.
 
         :return: A dict with the result of the optimization
         :rtype: dict
@@ -71,9 +71,9 @@ class Manager(object):
         return result
 
     def get_installed_plugins(self):
-        """Get the list of installed Virtual Machines optimizations.
+        """Get the list of installed VM optimizations.
 
-        :return: The list of installed Virtual Machines optimizations
+        :return: The list of installed VM optimizations
         :rtype: list[str]
         """
         return plugin_loader.get_vm_optimizations_names()

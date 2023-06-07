@@ -34,6 +34,7 @@ class Test2(MetricCollectorBase):
             unit="MB/s",
             timestamp=datetime.now(),
             hostname=machine_id,
+            collected_from="test2",
         )
 
         print("TEST-Collector:", metric)

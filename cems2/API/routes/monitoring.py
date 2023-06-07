@@ -79,7 +79,7 @@ class MonitoringController(object):
 
     def monitor_again(self):
         """Notify to the CloudAnalyticsManager to monitor again."""
-        self.cloud_analytics_manager.monitor_again()
+        self.cloud_analytics_manager.running = True
 
     def notify_new_metrics(self, metrics: dict):
         """Notify to the ActionsController a new metrics update."""

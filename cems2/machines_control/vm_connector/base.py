@@ -1,4 +1,4 @@
-"""Base class for Virtual Machine Connector plug-ins."""
+"""Base class for VMs Connector plug-ins."""
 
 from abc import ABCMeta, abstractmethod
 
