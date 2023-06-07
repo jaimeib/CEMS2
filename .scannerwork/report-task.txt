@@ -1,6 +1,0 @@
-projectKey=cems2
-serverUrl=http://localhost:9000
-serverVersion=10.0.0.68432
-dashboardUrl=http://localhost:9000/dashboard?id=cems2
-ceTaskId=AYiWM4-aBTByic1Ly8z1
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AYiWM4-aBTByic1Ly8z1
