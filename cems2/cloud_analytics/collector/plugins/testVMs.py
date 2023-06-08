@@ -22,32 +22,34 @@ class TestVMs(MetricCollectorBase):
         """Initialize the utilization test collector."""
 
     async def collect_metric(self, machine_id):
-        """Collect a utilization metric."""
+        """Collect a utilization metric.
 
+        :param machine_id: The id of the machine (hostname)
+        :type machine_id: str
+
+        :return: The metric
+        :rtype: Metric
+        """
         # Simulate a delay in the collection of the metric
         await trio.sleep(random.randint(1, 5))
 
-        # Generate a random int value in range 0-10 VMs
-        num_vms = random.randint(0, 10)
+        # Generate a random int value in range 0-5 VMs
+        num_vms = random.randint(0, 5)
 
         vms_list = []
 
         for _ in range(num_vms):
             vms_list.append(
                 {
-                    "uuid": str(uuid.uuid4()),
-                    "vcpus": random.randint(0, 16),
-                    "memory": {
-                        "amount": random.randint(0, 16384),
-                        "unit": "MB",
-                    },
-                    "disk": {"amount": random.randint(0, 100), "unit": "GB"},
-                    "managed_by": "OpenStack",
+                    "vcpus": random.randint(1, 8),
+                    "memory": {"amount": random.randint(1024, 8192), "unit": "MB"},
+                    "disk": {"amount": random.randint(10, 50), "unit": "GB"},
+                    "managed_by": "test",  # The VM connector that manages the VM
                 }
             )
 
-        # Convert the list to a dict the key is the vmsX where X is the number of the VM
-        vms_dict = {"vms{}".format(i): vms_list[i] for i in range(len(vms_list))}
+        # Create a dict with the VMs
+        vms_dict = {str(uuid.uuid4()): vm for vm in vms_list}
 
         # Convert the dict to a json
         vms_json = json.dumps(vms_dict)
@@ -58,7 +60,7 @@ class TestVMs(MetricCollectorBase):
             payload=vms_json,
             timestamp=datetime.now(),
             hostname=machine_id,
-            collected_from="testVMs",
+            collected_from="test_VMs",
         )
 
         print("TEST-Collector:", metric)

@@ -32,7 +32,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
-
         # API controller
         self.api_controller = actions_controller
 
@@ -66,7 +65,6 @@ class Manager(object):
         :param value: new running status (on/off)
         :type value: bool
         """
-
         self._running = value
         if value is True:
             LOG.warning("Machines Control Manager started")
@@ -85,7 +83,6 @@ class Manager(object):
         :param machines_list: list of PMs
         :type machines_list: list
         """
-
         self._pm_monitoring = machines_list
         LOG.info(
             "PMs to control: %s",
@@ -97,9 +94,10 @@ class Manager(object):
             self.running = True
 
     def _load_managers(self):
-        # self.vm_optimization = vm_optimization_manager.Manager()
+        """Load the submanagers."""
+        self.vm_optimization = vm_optimization_manager.Manager()
         self.pm_optimization = pm_optimization_manager.Manager()
-        # self.vm_connector = vm_connector_manager.Manager()
+        self.vm_connector = vm_connector_manager.Manager()
         self.pm_connector = pm_connector_manager.Manager()
 
         # Set this manager on the necesary submanagers
@@ -156,7 +154,7 @@ class Manager(object):
             # Start the running control task
             nursery.start_soon(self._running_control_task)
             # Start the defaul_vm_optimization
-            # nursery.start_soon(self.vm_optimization.default_vm_optimization.run)
+            nursery.start_soon(self.vm_optimization.default_vm_optimization.run)
             # Start the defaul_pm_optimization
             nursery.start_soon(self.pm_optimization.default_pm_optimization.run)
             # Start the control tasks
@@ -193,20 +191,23 @@ class Manager(object):
         """
         while True:
             # Wait for new metrics event trigger
-            # while not self.new_metrics_event:
-            #     await trio.sleep(1)
+            while not self.new_metrics_event:
+                await trio.sleep(1)
 
-            # # Get the VM default optimization
-            # vm_optimization = await self.vm_optimization.get_optimization()
+            # Get the VM current distribution
+            current_dist = await self.vm_optimization.get_current_distribution()
 
-            # # Apply the VM default optimization
-            # await self.vm_connector.apply_optimization(vm_optimization)
+            # Get the VM default optimization
+            vm_optimization = await self.vm_optimization.get_default_optimization()
 
-            # # Notify the API controller to monitor the system again
-            # self.api_controller.monitor_again()
+            # Apply the VM default optimization
+            await self.vm_connector.apply_optimization(current_dist, vm_optimization)
 
-            # # Set the new metrics event trigger to False
-            # self.new_metrics_event = False
+            # Notify the API controller to monitor the system again
+            self.api_controller.monitor_again()
+
+            # Set the new metrics event trigger to False
+            self.new_metrics_event = False
 
             # Wait for new metrics event trigger
             while not self.new_metrics_event:
@@ -265,7 +266,7 @@ class Manager(object):
             return
 
         # Update the metrics on the optimization managers
-        # self.vm_optimization.new_metrics(metrics)
+        self.vm_optimization.new_metrics(metrics)
         self.pm_optimization.new_metrics(metrics)
 
         # Activate the event trigger to start the optimization sprint
@@ -362,7 +363,6 @@ class Manager(object):
         :return: list of installed plugins
         :rtype: list[Plugin]
         """
-
         plugins = []
 
         # Get the pm_connector plugins

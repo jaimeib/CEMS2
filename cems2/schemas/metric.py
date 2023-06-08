@@ -13,15 +13,13 @@ class Metric(BaseModel):
     payload: str = Field(
         ...,
         example={
-            "vm1": {
-                "uuid": "1234",
+            "uuid1": {
                 "vcpus": 2,
                 "memory": {"amount": 2048, "unit": "MB"},
                 "disk": {"amount": 20, "unit": "GB"},
                 "managed_by": "OpenStack",
             },
-            "vm2": {
-                "uuid": "5678",
+            "uuid2": {
                 "vcpus": 4,
                 "memory": {"amount": 4096, "unit": "MB"},
                 "disk": {"amount": 40, "unit": "GB"},

@@ -1,6 +1,5 @@
 """cloud_analytics manager module."""
 
-import copy
 import time
 
 import trio
@@ -28,7 +27,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the manager."""
-
         # API Controller
         self.api_controller = monitoring_controller
 
@@ -61,7 +59,6 @@ class Manager(object):
         :param machines_list: list of machines to monitor
         :type machines_list: list[Machine]
         """
-
         self._machines_monitoring = machines_list
         LOG.info(
             "PMs to monitor: %s",
@@ -105,7 +102,6 @@ class Manager(object):
             - Get the metrics from the collector manager
             - Send the metrics to the reporter manager
         """
-
         # Load the managers
         self._load_managers()
 

@@ -21,7 +21,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the PM connector manager."""
-
         # Control Manager
         self.machines_control_manager = None
 
@@ -158,10 +157,10 @@ class Manager(object):
 
         :param pm: PM to get the state of
         :type pm: Machine
+
         :return: The state of the PM
         :rtype: bool
         """
-
         # Get the connector of the PM
         pm_connector_plugin = self._get_pm_connector(pm)
 
@@ -185,13 +184,14 @@ class Manager(object):
         :return: The connector plugin of the PM
         :rtype: object
         """
+        plugin = None
         # Find the connector for the PM
         for pm_connector_name, pm_connector_plugin in self.pm_connectors:
             if pm_connector_name == pm.connector:
-                break
+                plugin = pm_connector_plugin
 
         # If the connector is not found, raise an exception
-        if pm_connector_plugin is None:
+        if plugin is None:
             LOG.error(
                 "PM Connector plugin '%s' is not installed",
                 pm.connector,
@@ -199,7 +199,7 @@ class Manager(object):
             raise Exception(f"PM Connector plugin '{pm.connector}' is not installed.")
 
         # Return the connector
-        return pm_connector_plugin
+        return plugin
 
     def get_installed_plugins(self):
         """Get the list of installed PM connectors.

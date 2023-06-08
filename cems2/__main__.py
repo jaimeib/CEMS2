@@ -1,6 +1,7 @@
 """CEMS2 Launcher."""
 
 import signal
+import sys
 from functools import partial
 
 import trio
@@ -22,7 +23,7 @@ machines_control_manager_cancel_scope = trio.CancelScope()
 
 
 def shutdown():
-    # Cancel all tasks
+    """Shutdown function."""
     api_cancel_scope.cancel()
     cloud_analytics_manager_cancel_scope.cancel()
     machines_control_manager_cancel_scope.cancel()
@@ -61,7 +62,6 @@ async def start_cloud_analytics_manager(cloud_analytics_manager):
 
 async def start_machines_control_manager(machines_control_manager):
     """Start the Machine Control Manager."""
-
     LOG.info("Starting Machine Control Manager")
 
     # Run the Machine Control Manager in a separate thread

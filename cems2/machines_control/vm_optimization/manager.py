@@ -37,7 +37,7 @@ class Manager(object):
         default_vm_optimization = plugin_loader.get_vm_optimizations()[
             default_vm_optimization_name
         ]
-        self.default_vm_optimization = default_vm_optimization
+        self.default_vm_optimization = default_vm_optimization()
         LOG.debug(
             "Default VM Optimizations loaded: %s",
             default_vm_optimization_name,
@@ -51,13 +51,12 @@ class Manager(object):
         )
 
     def new_metrics(self, new_metrics):
-        """Pass the new metrics to the optimization plugins running.
+        """Pass the new metrics to the default optimization.
 
         :param new_metrics: new metrics
         :type new_metrics: dict
         """
-
-        # Pass the new metrics to the default VM optimization
+        self.default_vm_optimization.recieve_metrics(new_metrics)
 
     async def get_default_optimization(self):
         """Get the default VM optimization.
@@ -65,10 +64,15 @@ class Manager(object):
         :return: A dict with the result of the optimization
         :rtype: dict
         """
+        return await self.default_vm_optimization.get_optimization()
 
-        result = {}
+    async def get_current_distribution(self):
+        """Get the current distribution of VMs.
 
-        return result
+        :return: A dict with the current distribution of VMs
+        :rtype: dict
+        """
+        return await self.default_vm_optimization.get_current_distribution()
 
     def get_installed_plugins(self):
         """Get the list of installed VM optimizations.

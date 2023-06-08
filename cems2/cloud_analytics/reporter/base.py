@@ -12,4 +12,8 @@ class MetricReporterBase(metaclass=ABCMeta):
 
     @abstractmethod
     async def report_metric(self, metric_list):
-        """Report the metric to report platform."""
+        """Report the metric to report platform.
+
+        :param metric_list: The list of metrics to report
+        :type metric_list: list[Metric]
+        """

@@ -17,7 +17,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the PM optimization manager."""
-
         # Obtain the list of PM optimizations configured in the config file
         default_pm_optimization_name = CONFIG.get(
             "machines_control.plugins", "default_pm_optimization"

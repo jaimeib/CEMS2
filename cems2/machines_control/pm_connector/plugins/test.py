@@ -26,7 +26,20 @@ class Test(PMConnectorBase):
         self.machines_status = create_data()
 
     async def power_on(self, m_ip, m_username, m_password, brand_name):
-        """Power on the machine."""
+        """Power on the machine.
+
+        :param m_ip: The IP address of the machine
+        :type m_ip: str
+
+        :param m_username: The username to connect to the machine
+        :type m_username: str
+
+        :param m_password: The password to connect to the machine
+        :type m_password: str
+
+        :param brand_name: The brand name of the machine
+        :type brand_name: str
+        """
         await trio.sleep(random.randint(1, 5))
         LOG.critical("Powering on: %s", m_ip)
 
@@ -35,7 +48,20 @@ class Test(PMConnectorBase):
         self.machines_status["on"].append(m_ip)
 
     async def power_off(self, m_ip, m_username, m_password, brand_name):
-        """Power off the machine."""
+        """Power off the machine.
+
+        :param m_ip: The IP address of the machine
+        :type m_ip: str
+
+        :param m_username: The username to connect to the machine
+        :type m_username: str
+
+        :param m_password: The password to connect to the machine
+        :type m_password: str
+
+        :param brand_name: The brand name of the machine
+        :type brand_name: str
+        """
         await trio.sleep(random.randint(1, 5))
         LOG.critical("Powering off: %s", m_ip)
 
@@ -44,7 +70,23 @@ class Test(PMConnectorBase):
         self.machines_status["off"].append(m_ip)
 
     async def get_power_state(self, m_ip, m_username, m_password, brand_name):
-        """Get the power state of the machine."""
+        """Get the power state of the machine.
+
+        :param m_ip: The IP address of the machine
+        :type m_ip: str
+
+        :param m_username: The username to connect to the machine
+        :type m_username: str
+
+        :param m_password: The password to connect to the machine
+        :type m_password: str
+
+        :param brand_name: The brand name of the machine
+        :type brand_name: str
+
+        :return: The power state of the machine
+        :rtype: bool
+        """
         await trio.sleep(random.randint(1, 5))
 
         # Search the machine in the list
@@ -56,6 +98,11 @@ class Test(PMConnectorBase):
 
 # Plugin utils:
 def create_data():
+    """Create the data for the test plugin.
+
+    :return: The data for the test plugin
+    :rtype: dict
+    """
     # Make a request to the API to get the list of machines available
     API_URL = "http://localhost:8000"
 

@@ -32,6 +32,12 @@ class Test(PMOptimizationBase):
             # Await the metrics to be recieved
             await self._wait_for_metrics()
 
+            # Clear the current optimization
+            self.current_optimization = None
+
+            # Clear the current distribution
+            self.current_distribution = None
+
             # Compute the distribution
             distribution = self._compute_algorithm()
 
@@ -148,6 +154,6 @@ class Test(PMOptimizationBase):
             await trio.sleep(1)
 
         # Log the optimization
-        LOG.debug("Got default PM optimization: %s", self.current_optimization)
+        LOG.debug("Obtained default PM optimization.")
 
         return self.current_optimization

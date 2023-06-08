@@ -21,8 +21,14 @@ class Test2(MetricCollectorBase):
         """Initialize the test collector."""
 
     async def collect_metric(self, machine_id):
-        """Collect a metric."""
+        """Collect a metric.
 
+        :param machine_id: The id of the machine (hostname)
+        :type machine_id: str
+
+        :return: The metric
+        :rtype: Metric
+        """
         # Simulate a delay in the collection of the metric
         await trio.sleep(random.randint(5, 15))
 

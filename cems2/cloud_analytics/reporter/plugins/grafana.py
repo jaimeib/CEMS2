@@ -14,7 +14,11 @@ class Grafana(MetricReporterBase):
         """Initialize the connection to Grafana Dashboard."""
 
     async def report_metric(self, metric_list):
-        """Report the metric to Grafana Dashboard."""
+        """Report the metric to Grafana Dashboard.
+
+        :param metric_list: The list of metrics to report
+        :type metric_list: list[Metric]
+        """
         LOG.info("Reporting metrics to Grafana Dashboard")
         print("Report:", metric_list)
         # Report the metric to Grafana Dashboard

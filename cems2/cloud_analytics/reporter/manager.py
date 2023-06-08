@@ -43,7 +43,6 @@ class Manager(object):
         :param metric_list: The list of metrics to send
         :type metric_list: list[Metric]
         """
-
         # If the metric list is empty, do nothing
         if not metric_list:
             return

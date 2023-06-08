@@ -18,9 +18,11 @@ class Test2(MetricReporterBase):
         """Initialize the test reporter."""
 
     async def report_metric(self, metric_list):
-        """Report the metric."""
+        """Report the metric.
 
+        :param metric_list: The list of metrics to report
+        :type metric_list: list[Metric]
+        """
         # Simulate a delay in the reporting of the metric
         await trio.sleep(random.randint(5, 15))
-
         print("Test-Reporter:", metric_list)
