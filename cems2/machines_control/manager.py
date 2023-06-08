@@ -104,6 +104,7 @@ class Manager(object):
 
         # Set this manager on the necesary submanagers
         self.pm_optimization.machines_control_manager = self
+        self.pm_connector.machines_control_manager = self
 
     def _set_baseline(self):
         """Set the baseline for the PMs.
@@ -169,7 +170,7 @@ class Manager(object):
             # If the running status is set to False
             if not self.running:
                 # Boot all the PMs
-                trio.run(self._boot_all)
+                await self._boot_all()
                 LOG.debug("Manager control tasks canceled")
 
                 # Wait until the running status is set to True

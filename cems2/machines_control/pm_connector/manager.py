@@ -21,6 +21,10 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the PM connector manager."""
+
+        # Control Manager
+        self.machines_control_manager = None
+
         # Obtain the list of PM connectors configured in the config file
         pm_connectors_list = CONFIG.getlist("machines_control.plugins", "pm_connectors")
 
@@ -39,6 +43,10 @@ class Manager(object):
         pm_connectors = [
             (i, plugin_loader.get_pm_connectors()[i]) for i in pm_connectors_list
         ]
+
+        # Create an instance of each PM connector
+        pm_connectors = [(i, j()) for i, j in pm_connectors]
+
         self.pm_connectors = pm_connectors
         LOG.debug("PM Connectors loaded: %s", pm_connectors_list)
 
@@ -82,8 +90,8 @@ class Manager(object):
             return
 
         # Turn on the machine
-        LOG.info("Turning on %s", pm.hostname)
-        await pm_connector_plugin().power_on(
+        LOG.warning("Turning on %s", pm.hostname)
+        await pm_connector_plugin.power_on(
             pm.management_ip,
             pm.management_username,
             pm.management_password,
@@ -96,6 +104,9 @@ class Manager(object):
         # Notify the controller that the machine is on
         if status == ON:
             LOG.debug("Checking that %s is now on", pm.hostname)
+            # Update the machine status
+            pm.energy_status = ON
+            self.machines_control_manager.notify_machine_status(pm)
         else:
             LOG.error(
                 "Failed to turn on %s using connector %s",
@@ -118,8 +129,8 @@ class Manager(object):
             return
 
         # Turn off the machine
-        LOG.info("Turning off %s", pm.hostname)
-        await pm_connector_plugin().power_off(
+        LOG.warning("Turning off %s", pm.hostname)
+        await pm_connector_plugin.power_off(
             pm.management_ip,
             pm.management_username,
             pm.management_password,
@@ -132,6 +143,9 @@ class Manager(object):
         # Notify the controller that the machine is off
         if status == OFF:
             LOG.debug("Checking that %s is now off", pm.hostname)
+            # Update the machine status
+            pm.energy_status = OFF
+            self.machines_control_manager.notify_machine_status(pm)
         else:
             LOG.error(
                 "Failed to turn off %s using connector %s",
@@ -152,7 +166,7 @@ class Manager(object):
         pm_connector_plugin = self._get_machine_connector(pm)
 
         # Get the power state of the machine
-        status = await pm_connector_plugin().get_power_state(
+        status = await pm_connector_plugin.get_power_state(
             pm.management_ip,
             pm.management_username,
             pm.management_password,
