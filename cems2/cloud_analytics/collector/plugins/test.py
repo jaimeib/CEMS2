@@ -1,5 +1,6 @@
 """Metric collector test plug-in."""
 
+import json
 import random
 from datetime import datetime
 
@@ -25,13 +26,15 @@ class Test(MetricCollectorBase):
         # Simulate a delay in the collection of the metric
         await trio.sleep(random.randint(1, 5))
 
-        # Generate a random float value between 0 and 100 and round it to 3 decimals
-        value = round(random.uniform(0, 100), 3)
+        # Generate a payload with a random value and a unit of %
+        payload = {"value": round(random.uniform(0, 100), 3), "unit": "%"}
+
+        # Coverting the payload to json
+        payload_json = json.dumps(payload)
 
         metric = Metric(
             name="test",
-            value=value,
-            unit="%",
+            payload=payload_json,
             timestamp=datetime.now(),
             hostname=machine_id,
             collected_from="test",

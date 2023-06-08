@@ -97,13 +97,12 @@ class Manager(object):
             self.running = True
 
     def _load_managers(self):
-        self.vm_optimization = vm_optimization_manager.Manager()
+        # self.vm_optimization = vm_optimization_manager.Manager()
         self.pm_optimization = pm_optimization_manager.Manager()
-        self.vm_connector = vm_connector_manager.Manager()
+        # self.vm_connector = vm_connector_manager.Manager()
         self.pm_connector = pm_connector_manager.Manager()
 
         # Set this manager on the necesary submanagers
-        self.pm_optimization.machines_control_manager = self
         self.pm_connector.machines_control_manager = self
 
     def _set_baseline(self):
@@ -193,7 +192,7 @@ class Manager(object):
         - Notify the API controller to monitor the system again
         """
         while True:
-            # # Wait for new metrics event trigger
+            # Wait for new metrics event trigger
             # while not self.new_metrics_event:
             #     await trio.sleep(1)
 
@@ -266,7 +265,7 @@ class Manager(object):
             return
 
         # Update the metrics on the optimization managers
-        self.vm_optimization.new_metrics(metrics)
+        # self.vm_optimization.new_metrics(metrics)
         self.pm_optimization.new_metrics(metrics)
 
         # Activate the event trigger to start the optimization sprint

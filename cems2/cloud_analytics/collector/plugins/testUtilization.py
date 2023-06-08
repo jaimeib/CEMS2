@@ -1,5 +1,6 @@
 """Metric collector utilization test plug-in."""
 
+import json
 import random
 from datetime import datetime
 
@@ -26,14 +27,19 @@ class TestUtilization(MetricCollectorBase):
         await trio.sleep(random.randint(1, 5))
 
         # Generate a random float value between 0 and 100 and round it to 3 decimals
-        first_value = round(random.uniform(0, 100), 3)
+        value = round(
+            random.choice([random.uniform(0, 100), 3, 0.0])
+        )  # To have more chances of having 0.0
 
-        value = random.choice([first_value, 0.0])  # To have more chances of having 0.0
+        # Generate a payload with a random value and a unit of %
+        payload = {"value": value, "unit": "%"}
+
+        # Coverting the payload to json
+        payload_json = json.dumps(payload)
 
         metric = Metric(
             name="utilization",
-            value=value,
-            unit="%",
+            payload=payload_json,
             timestamp=datetime.now(),
             hostname=machine_id,
             collected_from="testUtilization",

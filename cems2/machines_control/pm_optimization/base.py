@@ -8,7 +8,7 @@ class PMOptimizationBase(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(self):
-        """."""
+        """Initialize the PMs Optimization."""
 
     @abstractmethod
     async def run(self):

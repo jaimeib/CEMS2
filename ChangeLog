@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+* Some fixes & improve the logic of the plugin pm\_connector-test
+* Removed scannerwork directory from SonarQube
+* Running pm actions (Needs to be revised carefully to check all cases)
 * backup
 * Added monitoring with timeouts and cleanup initialization
 * Remove login api endpoints

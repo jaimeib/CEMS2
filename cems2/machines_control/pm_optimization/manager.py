@@ -18,9 +18,6 @@ class Manager(object):
     def __init__(self):
         """Initialize the PM optimization manager."""
 
-        # Global manager
-        self.machines_control_manager = None
-
         # Obtain the list of PM optimizations configured in the config file
         default_pm_optimization_name = CONFIG.get(
             "machines_control.plugins", "default_pm_optimization"
@@ -53,7 +50,6 @@ class Manager(object):
 
         # Get all the PM optimizations from the plugin loader
         self.pm_optimizations = plugin_loader.get_pm_optimizations()
-
         LOG.debug(
             "PM Optimizations loaded: %s",
             list(plugin_loader.get_pm_optimizations_names()),

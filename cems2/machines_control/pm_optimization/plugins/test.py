@@ -1,5 +1,6 @@
 """PMs Optimization test plug-in."""
 
+import json
 import random
 
 import trio
@@ -68,6 +69,9 @@ class Test(PMOptimizationBase):
         - If the machine has an utilization metric:
             - If the utilization is greater than 0.0, add the PM to the "on" list
             - If the utilization is 0.0, add the PM to the "off" list
+
+        :return: the distribution
+        :rtype: dict
         """
         # Initialize the optimization schema
         distribution = {"on": [], "off": []}
@@ -78,7 +82,7 @@ class Test(PMOptimizationBase):
             for metric in value:
                 if metric.name == "utilization":
                     # If the utilization is greater than 0.0
-                    if metric.value > 0.0:
+                    if float(json.loads(metric.payload)["value"]) > 0.0:
                         # Add the PM to the "on" list
                         distribution["on"].append(key)
                     else:
@@ -89,33 +93,55 @@ class Test(PMOptimizationBase):
         return distribution
 
     def _check_baseline(self, distribution):
-        # If there are machines to be turned off, check the baseline
-        if len(distribution["off"]) > 0:
-            baseline_counter = 0
+        """Check if the result of the optimization is below the baseline.
 
-            # For the ones that have to be turned off, move to "on", to have a baseline
-            for pm in distribution["off"]:
-                if baseline_counter < self.baseline:
-                    distribution["on"].append(pm)
-                    distribution["off"].remove(pm)
-                    baseline_counter += 1
+        :param distribution: the distribution
+        :type distribution: dict
 
-            return distribution
+        :return: the distribution
+        :rtype: dict
+        """
+        # For the ones that have to be turned off, move to "on", to have a baseline
+        for _ in range(self.baseline):
+            # If there are machines to be turned off, move them to "on"
+            if len(distribution["off"]) > 0:
+                # Pick a machine to be turned on randomly
+                machine = random.choice(distribution["off"])
+                # Remove the machine from the "off" list
+                distribution["off"].remove(machine)
+                # Add the machine to the "on" list
+                distribution["on"].append(machine)
+            else:
+                break
+
+        return distribution
 
     def recieve_metrics(self, metrics):
-        """Recieve the metrics from the manager."""
+        """Recieve the metrics from the manager.
+
+        :param metrics: the metrics
+        :type metrics: dict
+        """
         LOG.debug("Metrics recieved in the optimization plugin")
         # Set the metrics
         self.metrics = metrics
 
     def recieve_baseline(self, baseline):
-        """Recieve the baseline from the manager."""
+        """Recieve the baseline from the manager.
+
+        :param baseline: the baseline
+        :type baseline: int
+        """
         LOG.debug("Baseline recieved in optimization plugin")
         # Set the baseline
         self.baseline = baseline
 
     async def get_optimization(self):
-        """Get the optimization result."""
+        """Get the optimization result.
+
+        :return: A dict with the result of the optimization
+        :rtype: dict
+        """
         if self.current_optimization is None:
             LOG.debug("Waiting for optimization to be calculated.")
         while self.current_optimization is None:

@@ -44,7 +44,7 @@ class Manager(object):
             (i, plugin_loader.get_pm_connectors()[i]) for i in pm_connectors_list
         ]
 
-        # Create an instance of each PM connector
+        # Create an instance of each PM connector (Only one object for each connector)
         pm_connectors = [(i, j()) for i, j in pm_connectors]
 
         self.pm_connectors = pm_connectors
@@ -70,7 +70,7 @@ class Manager(object):
 
         if cancel_scope.cancelled_caught:
             LOG.error(
-                "PM optimization timeout for machine %s using connector %s",
+                "PM connector timeout for machine %s using connector %s.",
                 pm.hostname,
                 pm.connector,
             )
@@ -82,7 +82,7 @@ class Manager(object):
         :type pm: Machine
         """
         # Get the connector of the PM
-        pm_connector_plugin = self._get_machine_connector(pm)
+        pm_connector_plugin = self._get_pm_connector(pm)
 
         # Check if the machine is already on
         if pm.energy_status == ON:
@@ -121,7 +121,7 @@ class Manager(object):
         :type pm: Machine
         """
         # Get the connector of the PM
-        pm_connector_plugin = self._get_machine_connector(pm)
+        pm_connector_plugin = self._get_pm_connector(pm)
 
         # Check if the machine is already off
         if pm.energy_status == OFF:
@@ -163,7 +163,7 @@ class Manager(object):
         """
 
         # Get the connector of the PM
-        pm_connector_plugin = self._get_machine_connector(pm)
+        pm_connector_plugin = self._get_pm_connector(pm)
 
         # Get the power state of the machine
         status = await pm_connector_plugin.get_power_state(
@@ -176,7 +176,7 @@ class Manager(object):
         # Return the state
         return status
 
-    def _get_machine_connector(self, pm: Machine):
+    def _get_pm_connector(self, pm: Machine):
         """Get the connector of a PM.
 
         :param pm: PM to get the connector of
