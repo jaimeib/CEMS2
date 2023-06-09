@@ -3,6 +3,7 @@
 import json
 import random
 
+import rich
 import trio
 
 from cems2 import log
@@ -155,5 +156,6 @@ class Test(PMOptimizationBase):
 
         # Log the optimization
         LOG.debug("Obtained default PM optimization.")
+        rich.print(self.current_optimization)
 
         return self.current_optimization

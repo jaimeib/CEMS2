@@ -4,6 +4,7 @@ import json
 import random
 from datetime import datetime
 
+import rich
 import trio
 
 from cems2 import log
@@ -46,5 +47,5 @@ class Test2(MetricCollectorBase):
             collected_from="test2",
         )
 
-        print("TEST-Collector:", metric)
+        rich.print("TEST-COLLECTOR", metric)
         return metric

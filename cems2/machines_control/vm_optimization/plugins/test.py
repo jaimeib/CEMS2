@@ -4,6 +4,7 @@ import copy
 import json
 import random
 
+import rich
 import trio
 
 from cems2 import log
@@ -194,6 +195,7 @@ class Test(VMOptimizationBase):
 
         # Log the optimization
         LOG.debug("Obtained default VM optimization.")
+        rich.print(self.current_optimization)
 
         return self.current_optimization
 
@@ -210,5 +212,6 @@ class Test(VMOptimizationBase):
 
         # Log the distribution
         LOG.debug("Obtained current distribution.")
+        rich.print(self.current_distribution)
 
         return self.current_distribution

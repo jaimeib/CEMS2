@@ -573,11 +573,15 @@ def _update_available_machines(hosts):
                 machine.available = False
                 # Also disable the monitoring flag of the machine (because it is not available)
                 machine.monitoring = False
+                # Also disable the energy_status flag of the machine (because it is not available)
+                machine.energy_status = False
                 db.commit()
                 LOG.critical(f"Host {machine.hostname} is not available now.")
         else:
             # If the machine is disabled, enable it
             if not machine.available:
                 machine.available = True
+                # Also not establish the energy_status
+                machine.energy_status = None
                 db.commit()
                 LOG.critical(f"Host {machine.hostname} is available now.")

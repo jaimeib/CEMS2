@@ -5,6 +5,7 @@ import random
 import uuid
 from datetime import datetime
 
+import rich
 import trio
 
 from cems2 import log
@@ -63,5 +64,5 @@ class TestVMs(MetricCollectorBase):
             collected_from="test_VMs",
         )
 
-        print("TEST-Collector:", metric)
+        rich.print("TEST-COLLECTOR", metric)
         return metric

@@ -2,6 +2,7 @@
 
 import random
 
+import rich
 import trio
 
 from cems2 import log
@@ -25,4 +26,4 @@ class Test(MetricReporterBase):
         """
         # Simulate a delay in the reporting of the metric
         await trio.sleep(random.randint(1, 5))
-        print("Test-Reporter:", metric_list)
+        rich.print("TEST-REPORTER", metric_list)

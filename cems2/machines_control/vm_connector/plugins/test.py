@@ -2,6 +2,7 @@
 
 import random
 
+import rich
 import trio
 
 from cems2 import log
@@ -26,4 +27,4 @@ class Test(VMConnectorBase):
         """
         LOG.critical("Migrating VM %s to PM %s", vm_id, pm_hostname)
         await trio.sleep(random.randint(1, 5))
-        print("TEST-VM_CONNECTOR: Migrating VM %s to PM %s" % (vm_id, pm_hostname))
+        rich.print("TEST-VM_CONNECTOR: Migrating VM %s to PM %s" % (vm_id, pm_hostname))

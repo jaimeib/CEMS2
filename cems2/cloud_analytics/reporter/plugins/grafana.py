@@ -20,5 +20,5 @@ class Grafana(MetricReporterBase):
         :type metric_list: list[Metric]
         """
         LOG.info("Reporting metrics to Grafana Dashboard")
-        print("Report:", metric_list)
+        rich.print("GRAFANA", metric_list)
         # Report the metric to Grafana Dashboard

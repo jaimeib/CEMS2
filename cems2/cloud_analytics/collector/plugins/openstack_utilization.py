@@ -2,6 +2,8 @@
 
 from datetime import datetime
 
+import rich
+
 from cems2 import log
 from cems2.cloud_analytics.collector.base import MetricCollectorBase
 from cems2.schemas.metric import Metric
@@ -29,5 +31,5 @@ class OpenStackUtilization(MetricCollectorBase):
             timestamp=datetime.now(),
             hostname=machine_id,
         )
-        print("Collect:", metric)
+        rich.print("OPENSTACK-UTILIZATION", metric)
         return metric

@@ -1,6 +1,8 @@
 CHANGES
 =======
 
+* VM Optimizations + VM Connections DONE
+* Changed value to str payload (json) in Metric Schema
 * Some fixes & improve the logic of the plugin pm\_connector-test
 * Removed scannerwork directory from SonarQube
 * Running pm actions (Needs to be revised carefully to check all cases)
