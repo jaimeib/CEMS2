@@ -366,27 +366,65 @@ class Manager(object):
         plugins = []
 
         # Get the pm_connector plugins
-        plugins.extend(
-            Plugin(name=plugin, type="pm_connector")
+        pm_connectors = []
+        pm_connectors.extend(
+            Plugin(name=plugin, type="pm_connector", status="installed")
             for plugin in self.pm_connector.get_installed_plugins()
         )
 
+        # Add the Loaded status if there are in the config file
+        for plugin in pm_connectors:
+            if plugin.name in CONFIG["machines_control.plugins"]["pm_connectors"]:
+                plugin.status = "loaded"
+
+        plugins.extend(pm_connectors)
+
         # Get the pm_optimization plugins
-        plugins.extend(
-            Plugin(name=plugin, type="pm_optimization")
+        pm_optimizations = []
+        pm_optimizations.extend(
+            Plugin(name=plugin, type="pm_optimization", status="loaded")
             for plugin in self.pm_optimization.get_installed_plugins()
         )
 
+        # Add the Default status if there is in the config file
+        for plugin in pm_optimizations:
+            if (
+                plugin.name
+                == CONFIG["machines_control.plugins"]["default_pm_optimization"]
+            ):
+                plugin.status = "default"
+
+        plugins.extend(pm_optimizations)
+
         # Get the vm_connector plugins
-        plugins.extend(
-            Plugin(name=plugin, type="vm_connector")
+        vm_connectors = []
+        vm_connectors.extend(
+            Plugin(name=plugin, type="vm_connector", status="installed")
             for plugin in self.vm_connector.get_installed_plugins()
         )
 
+        # Add the Loaded status if there are in the config file
+        for plugin in vm_connectors:
+            if plugin.name in CONFIG["machines_control.plugins"]["vm_connectors"]:
+                plugin.status = "loaded"
+
+        plugins.extend(vm_connectors)
+
         # Get the vm_optimization plugins
-        plugins.extend(
-            Plugin(name=plugin, type="vm_optimization")
+        vm_optimizations = []
+        vm_optimizations.extend(
+            Plugin(name=plugin, type="vm_optimization", status="loaded")
             for plugin in self.vm_optimization.get_installed_plugins()
         )
+
+        # Add the Default status if there is in the config file
+        for plugin in vm_optimizations:
+            if (
+                plugin.name
+                == CONFIG["machines_control.plugins"]["default_vm_optimization"]
+            ):
+                plugin.status = "default"
+
+        plugins.extend(vm_optimizations)
 
         return plugins

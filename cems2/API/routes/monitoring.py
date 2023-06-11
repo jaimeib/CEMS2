@@ -240,7 +240,7 @@ def _get_metrics_by_hostname(hostname: str, metric_name: str = None):
     status_code=status.HTTP_200_OK,
     response_model=list[Plugin],
 )
-def _get_plugins(type: str = None):
+def _get_plugins(type: str = None, status: str = None):
     """
     Get the plugins installed by type.
 
@@ -259,6 +259,10 @@ def _get_plugins(type: str = None):
     # Filter the plugins by type
     if type:
         plugin_list = [plugin for plugin in plugin_list if plugin.type == type]
+
+    # Filter the plugins by status
+    if status:
+        plugin_list = [plugin for plugin in plugin_list if plugin.status == status]
 
     return plugin_list
 
@@ -293,17 +297,9 @@ def _switch_monitoring_cloud_analytics(state: bool):
     """
     # If the state is the same, do nothing
     if monitoring_controller.cloud_analytics_manager.running == state:
-        return Message(
-            message="Cloud Analytics Application is already {}".format(
-                "on" if state else "off"
-            )
-        )
+        return Message(message="{}".format("Running" if state else "Not Running"))
     else:
         # If the state is different, switch the state
         monitoring_controller.cloud_analytics_manager.running = state
 
-        return Message(
-            message="Cloud Analytics Application switched {}".format(
-                "on" if state else "off"
-            )
-        )
+        return Message(message="{}".format("Running" if state else "Not Running"))

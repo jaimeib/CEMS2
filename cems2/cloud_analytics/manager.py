@@ -183,14 +183,31 @@ class Manager(object):
         plugins = []
 
         # Get the collector plugins
-        plugins.extend(
-            Plugin(name=plugin, type="collector")
+        collectors = []
+        collectors.extend(
+            Plugin(name=plugin, type="collector", status="installed")
             for plugin in self.collector.get_installed_plugins()
         )
 
+        # Add the Loaded status if there are in the config file
+        for plugin in collectors:
+            if plugin.name in CONFIG.getlist("cloud_analytics.plugins", "collectors"):
+                plugin.status = "Loaded"
+
+        plugins.extend(collectors)
+
         # Get the reporter plugins
-        plugins.extend(
-            Plugin(name=plugin, type="reporter")
+        reporters = []
+        reporters.extend(
+            Plugin(name=plugin, type="reporter", status="installed")
             for plugin in self.reporter.get_installed_plugins()
         )
+
+        # Add the Loaded status if there are in the config file
+        for plugin in reporters:
+            if plugin.name in CONFIG.getlist("cloud_analytics.plugins", "reporters"):
+                plugin.status = "Loaded"
+
+        plugins.extend(reporters)
+
         return plugins

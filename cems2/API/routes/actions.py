@@ -135,7 +135,7 @@ actions_controller = ActionsController()
     status_code=status.HTTP_200_OK,
     response_model=list[Plugin],
 )
-def _get_plugins(type: str = None):
+def _get_plugins(type: str = None, status: str = None):
     """
     Get the plugins installed by the following types:
 
@@ -159,6 +159,10 @@ def _get_plugins(type: str = None):
     # Filter the plugins by type
     if type:
         plugin_list = [plugin for plugin in plugin_list if plugin.type == type]
+
+    # Filter the plugins by status
+    if status:
+        plugin_list = [plugin for plugin in plugin_list if plugin.status == status]
 
     return plugin_list
 
@@ -194,14 +198,10 @@ def _switch_actions_machines_control(state: bool):
     # If the state is the same, do nothing
     if actions_controller.machines_control_manager.running == state:
         return Message(
-            message="Machines Control Application already {}".format(
-                "on" if state else "off"
-            )
+            message="Already {}".format("Running" if state else "Not Running")
         )
     else:
         # If the state is different, switch the state
         actions_controller.machines_control_manager.running = state
 
-        return Message(
-            message="Machines Control Application {}".format("on" if state else "off")
-        )
+        return Message(message="{}".format("Running" if state else "Not Running"))

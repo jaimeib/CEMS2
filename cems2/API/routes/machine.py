@@ -44,6 +44,7 @@ class MachineManager(object):
         self,
         group_name: str = None,
         brand_model: str = None,
+        connector: str = None,
         energy_status: bool = None,
         monitoring: bool = None,
         available: bool = None,
@@ -55,6 +56,9 @@ class MachineManager(object):
 
         :param brand_model: The brand model of the machines
         :type brand_model: str
+
+        :param connector: The connector name of the machines
+        :type connector: str
 
         :param energy_status: The energy status of the machines
         :type energy_status: bool
@@ -72,6 +76,7 @@ class MachineManager(object):
             machine_list = _get_machines(
                 group_name=group_name,
                 brand_model=brand_model,
+                connector=connector,
                 energy_status=energy_status,
                 monitoring=monitoring,
                 available=available,
@@ -184,6 +189,7 @@ machine_manager = MachineManager()
 def _get_machines(
     group_name: str = None,
     brand_model: str = None,
+    connector: str = None,
     energy_status: bool = None,
     monitoring: bool = None,
     available: bool = None,
@@ -209,6 +215,7 @@ def _get_machines(
     **Optional filters:** The machines can be filtered by the following parameters:
     - **group_name**: The group name of the machine
     - **brand_model**: The brand model of the machine
+    - **connector**: The connector name of the machine
     - **energy_status**: True if the machine is on, False otherwise
     - **monitoring**: True if the machine is being monitored, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise
@@ -226,6 +233,12 @@ def _get_machines(
     if brand_model is not None:
         machines_model = [
             machine for machine in machines_model if machine.brand_model == brand_model
+        ]
+
+    # Filter by connector
+    if connector is not None:
+        machines_model = [
+            machine for machine in machines_model if machine.connector == connector
         ]
 
     if energy_status is not None:
@@ -334,7 +347,7 @@ def _get_machine_by_hostname(hostname: str, db_session: Session = Depends(get_db
 
 
 @machines.patch(
-    "/machines/id={id}/monitoring",
+    "/machines/id={id}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
     summary="Update if the machine has to be monitored by its ID",
@@ -398,7 +411,7 @@ def _update_machine_monitoring(
 
 
 @machines.patch(
-    "/machines/hostname={hostname}/monitoring",
+    "/machines/hostname={hostname}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
     summary="Update if the machines has to be monitored by hostname",

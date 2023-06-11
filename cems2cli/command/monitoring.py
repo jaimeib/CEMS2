@@ -1,11 +1,13 @@
 """Monitoring commands for the cems2cli command line interface."""
 
+import json
+from typing import Optional
+
 import requests
 import rich
 import typer
-from fastapi import status
-from typer import Argument, Option
-from typing_extensions import Annotated
+from fastapi import status as HTTPstatus
+from typer import Option
 
 from cems2cli import config_loader
 
@@ -15,6 +17,9 @@ CONFIG = config_loader.get_config()
 # From the configuration, get the base URL for the API
 API_BASE_URL = CONFIG["API"]["URL"]
 
+# Table title
+TITLE = "CEMS2 Cloud Analytics System"
+
 # Create a typer app
 monitoring_app = typer.Typer()
 
@@ -22,11 +27,31 @@ monitoring_app = typer.Typer()
 @monitoring_app.command(
     "plugins", help="Get plugins installed on cems2 cloud analytics system."
 )
-def get_plugins(type: Annotated[str, Option(help="Type of the plugin.")] = None):
+def get_plugins(
+    type: Optional[str] = Option(
+        None,
+        "-t",
+        "--type",
+        help="Type of the plugin.",
+        case_sensitive=False,
+        show_default=False,
+    ),
+    status: Optional[str] = Option(
+        None,
+        "-s",
+        "--status",
+        help="Status of the plugin.",
+        case_sensitive=False,
+        show_default=False,
+    ),
+):
     """Get plugins on cems2 cloud analytics system.
 
     :param type: Type of the plugin.
     :type type: str
+
+    :param status: Status of the plugin.
+    :type status: str
     """
 
     # Create the URL for the API call
@@ -39,23 +64,29 @@ def get_plugins(type: Annotated[str, Option(help="Type of the plugin.")] = None)
     if type is not None:
         payload["type"] = type
 
+    # If the status is not None, add it to the payload
+    if status is not None:
+        payload["status"] = status
+
     # Make the API call
     response = requests.get(url, params=payload)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
 
         table = rich.table.Table(title="CEMS2 Machine Control System Plugins")
 
         table.add_column("Name", min_width=20)
         table.add_column("Type", min_width=20)
+        table.add_column("Status", min_width=20)
 
         # Loop through the response
         for plugin in response.json():
             table.add_row(
                 plugin["name"],
                 plugin["type"],
+                plugin["status"],
             )
 
         rich.print(table)
@@ -77,9 +108,9 @@ def get_status():
     response = requests.get(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
-        table = rich.table.Table(title="CEMS2 Cloud Analytics System")
+        table = rich.table.Table(title=TITLE)
 
         table.add_column("Status", justify="center", style="bold", min_width=30)
 
@@ -108,9 +139,9 @@ def start():
     response = requests.put(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
-        table = rich.table.Table(title="CEMS2 Cloud Analytics System")
+        table = rich.table.Table(title=TITLE)
 
         table.add_column("Status", justify="center", style="bold", min_width=30)
 
@@ -137,9 +168,9 @@ def stop():
     response = requests.put(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
-        table = rich.table.Table(title="CEMS2 Cloud Analytics System")
+        table = rich.table.Table(title=TITLE)
 
         table.add_column("Status", justify="center", style="bold", min_width=30)
 
@@ -166,16 +197,16 @@ def restart():
     response = requests.put(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Create the URL for the API call to start the system
         url = f"{API_BASE_URL}/monitoring/cloud-analytics=True"
 
         # Make the API call
         response = requests.put(url)
 
-        if response.status_code == status.HTTP_200_OK:
+        if response.status_code == HTTPstatus.HTTP_200_OK:
             # Print the response as a table
-            table = rich.table.Table(title="CEMS2 Cloud Analytics System")
+            table = rich.table.Table(title=TITLE)
 
             table.add_column("Status", justify="center", style="bold", min_width=30)
 
@@ -199,9 +230,30 @@ def restart():
     "metrics", help="Get metrics from cems2 cloud analytics system."
 )
 def get_metrics(
-    name: Annotated[str, Option(help="Name of the metric.")] = None,
-    id: Annotated[str, Option(help="ID of the machine on cems2database.")] = None,
-    host: Annotated[str, Option(help="Hostname of the machine.")] = None,
+    name: Optional[str] = Option(
+        None,
+        "-n",
+        "--name",
+        help="Name of the metric.",
+        case_sensitive=True,
+        show_default=False,
+    ),
+    id: Optional[str] = Option(
+        None,
+        "-i",
+        "--id",
+        help="ID of the machine.",
+        case_sensitive=True,
+        show_default=False,
+    ),
+    host: Optional[str] = Option(
+        None,
+        "-h",
+        "--host",
+        help="Hostname of the machine.",
+        case_sensitive=True,
+        show_default=False,
+    ),
 ):
     """Get metrics from cems2 cloud analytics system.
 
@@ -211,8 +263,8 @@ def get_metrics(
     :param id: ID of the machine on cems2database.
     :type id: str
 
-    :param hostname: Hostname of the machine.
-    :type hostname: str
+    :param host: Hostname of the machine.
+    :type host: str
     """
 
     # Check that only one identifier was provided
@@ -236,13 +288,13 @@ def get_metrics(
 
     # If the hostname is not None, add it to the payload
     if host is not None:
-        payload["hostname"] = hostname
+        payload["hostname"] = host
 
     # Make the API call
     response = requests.get(url, params=payload)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
 
         rich.print(response.json())
@@ -255,8 +307,25 @@ def get_metrics(
         table.add_column("Collected from")
         table.add_column("Timestamp")
 
-        rich.print(table)
+        # Parse the response
+        metrics = parse_metrics(response.json(), table)
+
+        rich.print(metrics)
     # If the API call was not successful
     else:
         # Print an error message
         rich.print(f"[red]Error: {response.json()['detail']}[/red]")
+
+
+def parse_metrics(response, table):
+    for machine, metrics in response.items():
+        for metric in metrics:
+            table.add_row(
+                metric["name"],
+                metric["payload"],
+                metric["hostname"],
+                metric["collected_from"],
+                metric["timestamp"],
+            )
+
+    return table

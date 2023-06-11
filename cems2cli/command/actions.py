@@ -1,9 +1,11 @@
 """Actions commands for the cems2cli command line interface."""
 
+from typing import Optional
+
 import requests
 import rich
 import typer
-from fastapi import status
+from fastapi import status as HTTPstatus
 from typer import Argument, Option
 from typing_extensions import Annotated
 
@@ -15,6 +17,9 @@ CONFIG = config_loader.get_config()
 # From the configuration, get the base URL for the API
 API_BASE_URL = CONFIG["API"]["URL"]
 
+# Table title
+TITLE = "CEMS2 Machine Control System"
+
 # Create a typer app
 actions_app = typer.Typer()
 
@@ -22,11 +27,31 @@ actions_app = typer.Typer()
 @actions_app.command(
     "plugins", help="Get plugins installed on cems2 machine control system."
 )
-def get_plugins(type: Annotated[str, Option(help="Type of the plugin.")] = None):
+def get_plugins(
+    type: Optional[str] = Option(
+        None,
+        "-t",
+        "--type",
+        help="Type of the plugin.",
+        case_sensitive=False,
+        show_default=False,
+    ),
+    status: Optional[str] = Option(
+        None,
+        "-s",
+        "--status",
+        help="Status of the plugin.",
+        case_sensitive=False,
+        show_default=False,
+    ),
+):
     """Get plugins on cems2 machine control system.
 
     :param type: Type of the plugin.
     :type type: str
+
+    :param status: Status of the plugin.
+    :type status: str
     """
     # Create the URL for the API call
     url = f"{API_BASE_URL}/actions/plugins"
@@ -38,23 +63,29 @@ def get_plugins(type: Annotated[str, Option(help="Type of the plugin.")] = None)
     if type is not None:
         payload["type"] = type
 
+    # If the status is not None, add it to the payload
+    if status is not None:
+        payload["status"] = status
+
     # Make the API call
     response = requests.get(url, params=payload)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
 
         table = rich.table.Table(title="CEMS2 Machine Control System Plugins")
 
         table.add_column("Name", min_width=20)
         table.add_column("Type", min_width=20)
+        table.add_column("Status", min_width=20)
 
         # Loop through the response
         for plugin in response.json():
             table.add_row(
                 plugin["name"],
                 plugin["type"],
+                plugin["status"],
             )
 
         rich.print(table)
@@ -76,9 +107,9 @@ def get_status():
     response = requests.get(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
-        table = rich.table.Table(title="CEMS2 Machine Control System")
+        table = rich.table.Table(title=TITLE)
 
         table.add_column("Status", justify="center", style="bold", min_width=30)
 
@@ -107,9 +138,9 @@ def start():
     response = requests.put(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
-        table = rich.table.Table(title="CEMS2 Machine Control System")
+        table = rich.table.Table(title=TITLE)
 
         table.add_column("Status", justify="center", style="bold", min_width=30)
 
@@ -136,9 +167,9 @@ def stop():
     response = requests.put(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
-        table = rich.table.Table(title="CEMS2 Machine Control System")
+        table = rich.table.Table(title=TITLE)
 
         table.add_column("Status", justify="center", style="bold", min_width=30)
 
@@ -165,16 +196,16 @@ def restart():
     response = requests.put(url)
 
     # Check if the API call was successful
-    if response.status_code == status.HTTP_200_OK:
+    if response.status_code == HTTPstatus.HTTP_200_OK:
         # Create the URL for the API call to start the system
         url = f"{API_BASE_URL}/actions/machines_control=True"
 
         # Make the API call
         response = requests.put(url)
 
-        if response.status_code == status.HTTP_200_OK:
+        if response.status_code == HTTPstatus.HTTP_200_OK:
             # Print the response as a table
-            table = rich.table.Table(title="CEMS2 Machine Control System")
+            table = rich.table.Table(title=TITLE)
 
             table.add_column("Status", justify="center", style="bold", min_width=30)
 

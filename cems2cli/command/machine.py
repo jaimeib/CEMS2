@@ -1,5 +1,7 @@
 """Machine commands for the cems2cli command line interface."""
 
+from typing import Optional
+
 import requests
 import rich
 import typer
@@ -29,13 +31,70 @@ machine_app = typer.Typer()
     help="Get machines information.",
 )
 def get_machine(
-    host: Annotated[str, Option(help="Hostname of the machine.")] = None,
-    id: Annotated[str, Option(help="ID of the machine.")] = None,
-    group: Annotated[str, Option(help="Groupname of the machine.")] = None,
-    brand: Annotated[str, Option(help="Brand name of the machine.")] = None,
-    energy: Annotated[str, Option(help="Energy status of the machine.")] = None,
-    monitoring: Annotated[str, Option(help="Monitoring status of the machine.")] = None,
-    available: Annotated[str, Option(help="Available status of the machine.")] = None,
+    host: Optional[str] = Option(
+        None,
+        "-h",
+        "--host",
+        help="Hostname of the machine.",
+        case_sensitive=True,
+        show_default=False,
+    ),
+    id: Optional[str] = Option(
+        None,
+        "-i",
+        "--id",
+        help="ID of the machine.",
+        show_default=False,
+        case_sensitive=True,
+    ),
+    group: Optional[str] = Option(
+        None,
+        "-g",
+        "--group",
+        help="Groupname of the machine.",
+        case_sensitive=True,
+        show_default=False,
+    ),
+    brand: Optional[str] = Option(
+        None,
+        "-b",
+        "--brand",
+        help="Brand name of the machine.",
+        case_sensitive=True,
+        show_default=False,
+    ),
+    connector: Optional[str] = Option(
+        None,
+        "-c",
+        "--connector",
+        help="Connector name.",
+        case_sensitive=False,
+        show_default=False,
+    ),
+    energy: Optional[str] = Option(
+        None,
+        "-e",
+        "--energy",
+        help="Energy status.",
+        case_sensitive=False,
+        show_default=False,
+    ),
+    monitoring: Optional[str] = Option(
+        None,
+        "-m",
+        "--monitoring",
+        help="Monitoring.",
+        case_sensitive=False,
+        show_default=False,
+    ),
+    available: Optional[str] = Option(
+        None,
+        "-a",
+        "--available",
+        help="Available.",
+        case_sensitive=False,
+        show_default=False,
+    ),
 ):
     """Get machines information.
 
@@ -45,20 +104,138 @@ def get_machine(
     :param id: ID of the machine.
     :type id: str
 
-    :param groupname: Groupname of the machine.
-    :type groupname: str
+    :param group: Groupname of the machine.
+    :type group: str
 
-    :param brand_name: Brand name of the machine.
-    :type brand_name: str
+    :param brand: Brand name of the machine.
+    :type brand: str
 
-    :param energy_status: Energy status of the machine.
-    :type energy_status: str
+    :param connector: Connector name.
+    :type connector: str
+
+    :param energy: Energy status.
+    :type energy: str
+
+    :param monitoring: Monitoring.
+    :type monitoring: str
+
+    :param available: Available.
+    :type available: str
+    """
+
+    request = f"{API_BASE_URL}/machines"
+    payload = {}
+
+    # Check that only one identifier was provided
+    if host and id:
+        rich.print("[red]ERROR: Only one identifier can be provided.[/red]")
+        exit(1)
+
+    # Add the identifier to the request if it was provided
+    if host:
+        request += f"/hostname={host}"
+
+    elif id:
+        request += f"/id={id}"
+
+    else:
+        # Make the request with the filters provided
+        payload = add_filters(group, brand, connector, energy, monitoring, available)
+
+    # Get the machine information
+    response = requests.get(request, params=payload)
+
+    # Check if the request was successful
+    if response.status_code == status.HTTP_200_OK:
+        # If it was, print the machine information as a table
+
+        # Create a table
+        table = rich.table.Table(title="CEMS2 Machines Information")
+
+        # Add headers to the table
+        add_machine_headers(table)
+
+        # Add rows to the table
+        # If the response is a list, add all the machines to the table
+        if isinstance(response.json(), list):
+            for machine in response.json():
+                data = parse_machines(machine)
+                table.add_row(*data.values())
+        else:
+            # If the response is a dictionary, add the machine to the table
+            data = parse_machines(response.json())
+            table.add_row(*data.values())
+
+        # Print the table
+        rich.print(table)
+
+    else:
+        # If it wasn't, print the error message
+        rich.print(f"[red]{response.json()}[/red]")
+
+
+def add_filters(group, brand, connector, energy, monitoring, available):
+    # Make the request with the filters provided
+    filters = {}
+
+    # Add the groupname to the filters if it was provided
+    if group:
+        filters["group_name"] = group
+
+    # Add the brand to the filters if it was provided
+    if brand:
+        filters["brand_model"] = brand
+
+    # Add the connector to the filters if it was provided
+    if connector:
+        filters["connector"] = connector
+
+    # Add the energy status to the filters if it was provided
+    if energy:
+        filters["energy_status"] = energy
+
+    # Add the monitoring status to the filters if it was provided
+    if monitoring:
+        filters["monitoring"] = monitoring
+
+    # Add the available status to the filters if it was provided
+    if available:
+        filters["available"] = available
+
+    return filters
+
+
+# Command to update monitoring flag
+@machine_app.command("monitor", help="Update monitoring flag.")
+def update_monitoring(
+    monitoring: str,
+    host: Optional[str] = Option(
+        None,
+        "-h",
+        "--host",
+        help="Hostname of the machine.",
+        case_sensitive=True,
+        show_default=False,
+    ),
+    id: Optional[str] = Option(
+        None,
+        "-i",
+        "--id",
+        help="ID of the machine.",
+        show_default=False,
+        case_sensitive=True,
+    ),
+):
+    """Update monitoring flag.
+
+    :param hostname: Hostname of the machine.
+    :type hostname: str
+
+    :param id: ID of the machine.
+    :type id: str
 
     :param monitoring: Monitoring status of the machine.
     :type monitoring: str
-
-    :param available: Available status of the machine.
-    :type available: str
     """
 
     request = f"{API_BASE_URL}/machines"
@@ -76,59 +253,33 @@ def get_machine(
         request += f"/id={id}"
 
     else:
-        # Add the groupname to the request if it was provided
-        if group:
-            request += url_next_concater(request) + f"group_name={group}"
+        rich.print("[red]ERROR: No identifier provided.[/red]")
+        exit(1)
 
-        # Add the brand name to the request if it was provided
-        if brand:
-            request += url_next_concater(request) + f"brand_name={brand}"
+    # Create the URL for the API call
+    url = f"{request}?monitoring={monitoring}"
 
-        if energy:
-            request += url_next_concater(request) + f"energy_status={energy}"
+    # Make the API call
+    response = requests.patch(url)
 
-        if monitoring:
-            request += url_next_concater(request) + f"monitoring={monitoring}"
-
-        if available:
-            request += url_next_concater(request) + f"available={available}"
-
-    print(request)
-
-    # Get the machine information
-    response = requests.get(request)
-
-    print(response)
-
-    # Check if the request was successful
+    # Check if the API call was successful
     if response.status_code == status.HTTP_200_OK:
-        # If it was, print the machine information as a table
-
-        # Create a table
-        table = rich.table.Table(title="Machines Information")
+        # Print the response as a table
+        table = rich.table.Table(title="CEMS2 Machines Information")
 
         # Add headers to the table
         add_machine_headers(table)
 
-        # Add rows to the table
-        for machine in response.json():
-            data = parse_machines(machine)
-            table.add_row(*data.values())
+        data = parse_machines(response.json())
+        table.add_row(*data.values())
 
         # Print the table
         rich.print(table)
 
+    # If the API call was not successful
     else:
-        # If it wasn't, print the error message
-        rich.print(f"[red]{response.json()}[/red]")
-
-
-def url_next_concater(url):
-    # Find if the url has a ? or not
-    if "?" in url:
-        return "&"
-    else:
-        return "?"
+        # Print an error message
+        rich.print(f"[red]Error: {response.json()['detail']}[/red]")
 
 
 def add_machine_headers(table):
@@ -170,65 +321,3 @@ def parse_machines(machine):
         data["available"] = OFF
 
     return data
-
-
-# Command to update monitoring flag
-@machine_app.command("monitor", help="Update monitoring flag.")
-def update_monitoring(
-    status: str,
-    host: Annotated[str, Option(help="Hostname of the machine.")] = None,
-    id: Annotated[str, Option(help="ID of the machine.")] = None,
-):
-    """Update monitoring flag.
-
-    :param hostname: Hostname of the machine.
-    :type hostname: str
-
-    :param id: ID of the machine.
-    :type id: str
-
-    :param monitoring: Monitoring status of the machine.
-    :type monitoring: str
-    """
-
-    request = f"{API_BASE_URL}/machines"
-
-    # Check that only one identifier was provided
-    if host and id:
-        rich.print("[red]ERROR: Only one identifier can be provided.[/red]")
-        exit(1)
-
-    # Add the identifier to the request if it was provided
-    if host:
-        request += f"/hostname={host}"
-
-    elif id:
-        request += f"/id={id}"
-
-    else:
-        rich.print("[red]ERROR: No identifier provided.[/red]")
-        exit(1)
-
-    # Add the monitoring flag to the request if it was provided
-    request += f"/monitoring?monitoring={status}"
-
-    print(request)
-
-    # Get the machine information
-    response = requests.patch(request)
-
-    print(response)
-
-    # Create a table
-    table = rich.table.Table(title="Machines Information")
-
-    # Add headers to the table
-    add_machine_headers(table)
-
-    # Add rows to the table
-    for machine in response.json():
-        data = parse_machines(machine)
-        table.add_row(*data.values())
-
-    # Print the table
-    rich.print(table)

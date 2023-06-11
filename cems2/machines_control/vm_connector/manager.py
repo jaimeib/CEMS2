@@ -110,7 +110,7 @@ class Manager(object):
                 LOG.error(
                     "VMs are managed by different VM connectors.",
                 )
-                raise Exception(f"VMs are managed by different VM connectors.")
+                raise Exception("VMs are managed by different VM connectors.")
 
         # Get the VM connector
         plugin = None
