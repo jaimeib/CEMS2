@@ -298,7 +298,14 @@ def _switch_monitoring_cloud_analytics(state: bool):
     if monitoring_controller.cloud_analytics_manager.running == state:
         return Message(message="{}".format("Running" if state else "Not Running"))
     else:
+        # Disable admin lock in order to change the state
+        monitoring_controller.cloud_analytics_manager.admin_lock = False
+
         # If the state is different, switch the state
         monitoring_controller.cloud_analytics_manager.running = state
+
+        # If the state is off, set the admin lock to True in order to not start automatically
+        if not state:
+            monitoring_controller.cloud_analytics_manager.admin_lock = True
 
         return Message(message="{}".format("Running" if state else "Not Running"))

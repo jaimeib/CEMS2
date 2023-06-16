@@ -116,8 +116,8 @@ class Test2(PMOptimizationBase):
         for _ in range(self.baseline):
             # If there are machines to be turned off, move them to "on"
             if len(distribution["off"]) > 0:
-                # Pick a machine to be turned on randomly
-                machine = random.choice(distribution["off"])
+                # Pick a machine to be turned off
+                machine = distribution["off"][0]  # Pick the first one
                 # Remove the machine from the "off" list
                 distribution["off"].remove(machine)
                 # Add the machine to the "on" list
@@ -134,6 +134,8 @@ class Test2(PMOptimizationBase):
         :type metrics: dict
         """
         LOG.debug("Metrics recieved in the optimization plugin")
+        # Reset the current optimization
+        self.current_optimization = None
         # Set the metrics
         self.metrics = metrics
 
@@ -144,6 +146,8 @@ class Test2(PMOptimizationBase):
         :type baseline: int
         """
         LOG.debug("Baseline recieved in optimization plugin")
+        # Reset the current optimization
+        self.current_optimization = None
         # Set the baseline
         self.baseline = baseline
 

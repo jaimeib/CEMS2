@@ -326,7 +326,7 @@ class Manager(object):
             if cancel_scope.cancelled_caught:
                 LOG.error(
                     "PM Connector plugin '%s' timed out for machine: %s",
-                    self.pm_connector.name,
+                    machine.pm_connector,
                     machine.hostname,
                 )
 

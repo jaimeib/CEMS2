@@ -179,6 +179,10 @@ class Test(VMOptimizationBase):
         :type metrics: dict
         """
         LOG.debug("Metrics revieved in the optimization plugin.")
+        # Reset the current optimization
+        self.current_optimization = None
+        # Reset the current distribution
+        self.current_distribution = None
         # Set the metrics
         self.metrics = metrics
 

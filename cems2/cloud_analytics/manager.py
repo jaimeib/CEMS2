@@ -46,6 +46,7 @@ class Manager(object):
 
         # On/off switch
         self._running = None
+        self._admin_lock = False
 
     @property
     def machines_monitoring(self):
@@ -77,12 +78,28 @@ class Manager(object):
         :param value: value to set (on/off)
         :type value: bool
         """
-        self._running = value
+        # If the admin set the lock, the manager cannot be changed from machine_control
+        if not self._admin_lock:
+            self._running = value
 
-        if value is True:
-            LOG.warning("Cloud Analytics Manager started")
-        else:
-            LOG.warning("Cloud Analytics Manager stopped")
+            if value is True:
+                LOG.warning("Cloud Analytics Manager started")
+            else:
+                LOG.warning("Cloud Analytics Manager stopped")
+
+    @property
+    def admin_lock(self):
+        """Get the admin lock status of the manager."""
+        return self._admin_lock
+
+    @admin_lock.setter
+    def admin_lock(self, value: bool):
+        """Update the admin lock status of the manager.
+
+        :param value: value to set (on/off)
+        :type value: bool
+        """
+        self._admin_lock = value
 
     def _load_managers(self):
         """Load the collector and reporter managers."""
