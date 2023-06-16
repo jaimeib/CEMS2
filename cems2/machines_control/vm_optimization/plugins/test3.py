@@ -1,4 +1,4 @@
-"""VM optimization test plug-in."""
+"""VM optimization test 3 plug-in."""
 
 import copy
 import json
@@ -14,7 +14,7 @@ from cems2.machines_control.vm_optimization.base import VMOptimizationBase
 LOG = log.get_logger(__name__)
 
 
-class Test(VMOptimizationBase):
+class Test3(VMOptimizationBase):
     """Allows to test the optimization of the VMs."""
 
     def __init__(self):

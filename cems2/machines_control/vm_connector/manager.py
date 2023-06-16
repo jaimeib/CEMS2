@@ -27,7 +27,7 @@ class Manager(object):
                     "VM Connector plugin '%s' is not installed.",
                     vm_connector,
                 )
-                raise Exception(
+                raise RuntimeError(
                     f"VM Connector plugin '{vm_connector}' is not installed."
                 )
         # Get the VM connectors from the plugin loader
@@ -77,7 +77,7 @@ class Manager(object):
                     "Timeout reached while migrating VMs to PM '%s'.",
                     pm,
                 )
-                raise Exception(f"Timeout reached while migrating VMs to PM '{pm}'.")
+                raise RuntimeError(f"Timeout reached while migrating VMs to PM '{pm}'.")
 
     async def _migrate_vms(self, vms: list, pm_hostname: str):
         """Migrate the VMs to the PM.
@@ -110,7 +110,7 @@ class Manager(object):
                 LOG.error(
                     "VMs are managed by different VM connectors.",
                 )
-                raise Exception("VMs are managed by different VM connectors.")
+                raise RuntimeError("VMs are managed by different VM connectors.")
 
         # Get the VM connector
         plugin = None
@@ -124,7 +124,7 @@ class Manager(object):
                 "VM connector '%s' not found.",
                 vms_connector_name,
             )
-            raise Exception(f"VM connector '{vms_connector_name}' not found.")
+            raise RuntimeError(f"VM connector '{vms_connector_name}' not found.")
 
         return plugin
 

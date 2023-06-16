@@ -62,13 +62,14 @@ async def start_cloud_analytics_manager(cloud_analytics_manager):
 
 async def start_machines_control_manager(machines_control_manager):
     """Start the Machine Control Manager."""
-    LOG.info("Starting Machine Control Manager")
+    with machines_control_manager_cancel_scope:
+        LOG.info("Starting Machine Control Manager")
 
-    # Run the Machine Control Manager in a separate thread
-    await trio.to_thread.run_sync(machines_control_manager.run)
+        # Run the Machine Control Manager in a separate thread
+        await trio.to_thread.run_sync(machines_control_manager.run)
 
-    # If the Machine Control Manager stops, log it
-    LOG.error("Machine Control Manager stopped")
+        # If the Machine Control Manager stops, log it
+        LOG.error("Machine Control Manager stopped")
 
 
 async def async_main():

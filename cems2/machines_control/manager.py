@@ -154,9 +154,9 @@ class Manager(object):
             # Start the running control task
             nursery.start_soon(self._running_control_task)
             # Start the defaul_vm_optimization
-            nursery.start_soon(self.vm_optimization.default_vm_optimization.run)
+            nursery.start_soon(self.vm_optimization.default_vm_optimization.run, True)
             # Start the defaul_pm_optimization
-            nursery.start_soon(self.pm_optimization.default_pm_optimization.run)
+            nursery.start_soon(self.pm_optimization.default_pm_optimization.run, True)
             # Start the control tasks
             nursery.start_soon(self._control_tasks)
 
@@ -428,3 +428,29 @@ class Manager(object):
         plugins.extend(vm_optimizations)
 
         return plugins
+
+    def get_vm_optimizations(self, name: str = None):
+        """Obtain the VM optimizations.
+
+        :param name: name of the VM optimization
+        :type name: str
+
+        :return: list of VM optimizations
+        :rtype:  dict[str, dict]
+        """
+        # Launch the VM optimizations and get the results
+        optimizations = trio.run(self.vm_optimization.get_vm_optimizations, name)
+        return optimizations
+
+    def get_pm_optimizations(self, name: str = None):
+        """Obtain the PM optimizations.
+
+        :param name: name of the PM optimization
+        :type name: str
+
+        :return: list of PM optimizations
+        :rtype: dict[str, dict]
+        """
+        # Launch the PM optimizations and get the results
+        optimizations = trio.run(self.pm_optimization.get_pm_optimizations, name)
+        return optimizations

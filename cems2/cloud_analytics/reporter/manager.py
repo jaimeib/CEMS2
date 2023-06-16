@@ -27,7 +27,7 @@ class Manager(object):
                     "Reporter plugin '%s' is not installed.",
                     reporter,
                 )
-                raise Exception(f"Reporter plugin '{reporter}' is not installed.")
+                raise RuntimeError(f"Reporter plugin '{reporter}' is not installed.")
 
         # Get the reporters from the plugin loader
         reporters = [(i, plugin_loader.get_reporters()[i]) for i in reporters_list]

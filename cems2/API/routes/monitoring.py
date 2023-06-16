@@ -95,13 +95,13 @@ monitoring_controller = MonitoringController()
 
 @monitoring.get(
     "/monitoring/metrics",
-    summary="Get the lastest metrics from the cloud analytics application",
+    summary="Get the lastest metrics from the cloud analytics system",
     status_code=status.HTTP_200_OK,
     response_model=dict[str, list[Metric]],
 )
 def _get_metrics(metric_name: str = None):
     """
-    Get the lastest metrics from the cloud analytics application with the following data:
+    Get the lastest metrics from the cloud analytics system with the following data:
 
     - **name**: Name of the metric
     - **value**: Value of the metric
@@ -132,7 +132,7 @@ def _get_metrics(metric_name: str = None):
 
 @monitoring.get(
     "/monitoring/metrics/id={id}",
-    summary="Get the lastest metrics from the cloud analytics application of a machine by its id",
+    summary="Get the lastest metrics from the cloud analytics system of a machine identified by its ID",
     status_code=status.HTTP_200_OK,
     response_model=list[Metric],
 )
@@ -184,7 +184,7 @@ def _get_metrics_by_id(id: str, metric_name: str = None):
 
 @monitoring.get(
     "/monitoring/metrics/hostname={hostname}",
-    summary="Get the lastest metrics from the cloud analytics application by the machine hostname",
+    summary="Get the lastest metrics from the cloud analytics system identified by its hostname",
     status_code=status.HTTP_200_OK,
     response_model=list[Metric],
 )
@@ -236,7 +236,7 @@ def _get_metrics_by_hostname(hostname: str, metric_name: str = None):
 
 @monitoring.get(
     "/monitoring/plugins",
-    summary="Get the plugins installed by type (Collector or Reporter)",
+    summary="Get the plugins installed by type and status",
     status_code=status.HTTP_200_OK,
     response_model=list[Plugin],
 )
@@ -267,10 +267,9 @@ def _get_plugins(type: str = None, status: str = None):
     return plugin_list
 
 
-# Get if the cloud analytics application is running
 @monitoring.get(
     "/monitoring/cloud-analytics",
-    summary="Get if the cloud analytics application is running",
+    summary="Get if the cloud analytics system is running",
     status_code=status.HTTP_200_OK,
     response_model=bool,
 )
@@ -285,7 +284,7 @@ def _get_monitoring_cloud_analytics():
 
 @monitoring.put(
     "/monitoring/cloud-analytics={state}",
-    summary="Switch on/off monitoring of the cloud analytics application",
+    summary="Switch on/off the monitoring of the cloud analytics system",
     status_code=status.HTTP_200_OK,
     response_model=Message,
 )

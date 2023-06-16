@@ -52,7 +52,7 @@
 
 - groupname: cloudD
   brand_model: HP
-  hostname_range: [cloudD01, cloudD05]
+  hostname_range: [cloudD1, cloudD5]
   management_ip_range: [10.128.4.25, 10.128.4.29]
   management_username: HPAdmin
   management_password: HPPass

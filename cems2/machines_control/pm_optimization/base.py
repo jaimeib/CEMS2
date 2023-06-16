@@ -11,7 +11,7 @@ class PMOptimizationBase(metaclass=ABCMeta):
         """Initialize the PMs Optimization."""
 
     @abstractmethod
-    async def run(self):
+    async def run(self, always):
         """Run the PMs Optimization."""
 
     @abstractmethod

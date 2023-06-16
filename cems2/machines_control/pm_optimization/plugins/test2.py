@@ -1,4 +1,4 @@
-"""PMs Optimization test plug-in."""
+"""PMs Optimization test 2plug-in."""
 
 import json
 import random
@@ -13,7 +13,7 @@ from cems2.machines_control.pm_optimization.base import PMOptimizationBase
 LOG = log.get_logger(__name__)
 
 
-class Test(PMOptimizationBase):
+class Test2(PMOptimizationBase):
     """Allows to test the optimization of the PMs."""
 
     def __init__(self):

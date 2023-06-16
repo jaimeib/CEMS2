@@ -147,7 +147,7 @@ class MachineManager(object):
 
         # Check if the machine exists
         if machine_model is None:
-            raise Exception(f"Machine with hostname: {hostname} not found")
+            raise RuntimeError(f"Machine with hostname: {hostname} not found")
 
         # Check if there is not change in the energy status
         if machine_model.energy_status == energy_status:
@@ -157,7 +157,7 @@ class MachineManager(object):
         if machine_model.available:
             machine_model.energy_status = energy_status
         else:
-            raise Exception(
+            raise RuntimeError(
                 f"Machine with hostname: {hostname} not updated: is not available or being monitored"
             )
 
@@ -184,7 +184,7 @@ machine_manager = MachineManager()
     "/machines",
     response_model=list[Machine],
     status_code=status.HTTP_200_OK,
-    summary="Get all the machines",
+    summary="Get all the registered machines information",
 )
 def _get_machines(
     group_name: str = None,
@@ -266,7 +266,7 @@ def _get_machines(
     "/machines/id={id}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
-    summary="Get a machine by its ID",
+    summary="Get the machine information identified by its ID",
     responses={404: {"description": "Machine not found by ID", "model": Message}},
 )
 def _get_machine_by_id(id: int, db_session: Session = Depends(get_db)):
@@ -307,7 +307,7 @@ def _get_machine_by_id(id: int, db_session: Session = Depends(get_db)):
     "/machines/hostname={hostname}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
-    summary="Get a machine by its hostname",
+    summary="Get the machine information identified by its hostname",
     responses={404: {"description": "Machine not found by hostname", "model": Message}},
 )
 def _get_machine_by_hostname(hostname: str, db_session: Session = Depends(get_db)):
@@ -350,7 +350,7 @@ def _get_machine_by_hostname(hostname: str, db_session: Session = Depends(get_db
     "/machines/id={id}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
-    summary="Update if the machine has to be monitored by its ID",
+    summary="Set if the machine has to be monitored identified by its ID",
     responses={
         404: {"description": "Machine not found by its ID", "model": Message},
         400: {
@@ -414,7 +414,7 @@ def _update_machine_monitoring(
     "/machines/hostname={hostname}",
     response_model=Machine,
     status_code=status.HTTP_200_OK,
-    summary="Update if the machines has to be monitored by hostname",
+    summary="Set if the machines has to be monitored identified by hostname",
     responses={
         404: {"description": "Machine not found by hostname", "model": Message},
         400: {

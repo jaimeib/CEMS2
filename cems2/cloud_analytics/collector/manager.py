@@ -27,7 +27,7 @@ class Manager(object):
                     "Collector plugin '%s' is not installed.",
                     collector,
                 )
-                raise Exception(f"Collector plugin '{collector}' is not installed.")
+                raise RuntimeError(f"Collector plugin '{collector}' is not installed.")
 
         # Get the collectors from the plugin loader
         collectors = [(i, plugin_loader.get_collectors()[i]) for i in collectors_list]

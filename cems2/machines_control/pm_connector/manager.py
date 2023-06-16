@@ -34,7 +34,7 @@ class Manager(object):
                     "PM Connector plugin '%s' is not installed",
                     pm_connector,
                 )
-                raise Exception(
+                raise RuntimeError(
                     f"PM Connector plugin '{pm_connector}' is not installed."
                 )
 
@@ -196,7 +196,9 @@ class Manager(object):
                 "PM Connector plugin '%s' is not installed",
                 pm.connector,
             )
-            raise Exception(f"PM Connector plugin '{pm.connector}' is not installed.")
+            raise RuntimeError(
+                f"PM Connector plugin '{pm.connector}' is not installed."
+            )
 
         # Return the connector
         return plugin

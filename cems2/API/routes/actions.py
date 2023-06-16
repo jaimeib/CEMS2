@@ -131,7 +131,7 @@ actions_controller = ActionsController()
 
 @actions.get(
     "/actions/plugins",
-    summary="Get the installed plugins by type",
+    summary="Get the installed plugins by type and status",
     status_code=status.HTTP_200_OK,
     response_model=list[Plugin],
 )
@@ -169,29 +169,28 @@ def _get_plugins(type: str = None, status: str = None):
 
 @actions.get(
     "/actions/machines_control",
-    summary="Get if the machines control application is running",
+    summary="Get if the machines control system is running",
     status_code=status.HTTP_200_OK,
     response_model=bool,
 )
 def _get_actions_machines_control():
     """
-    Get if the machines control application is running
+    Get if the machines control system is running
 
-    **Returns**: A boolean with the state of the machines control application
+    **Returns**: A boolean with the state of the machines control system
     """
     return actions_controller.machines_control_manager.running
 
 
-# Switch on/off actions
 @actions.put(
     "/actions/machines_control={state}",
-    summary="Switch on/off machines control actions",
+    summary="Switch on/off machines control system",
     status_code=status.HTTP_200_OK,
     response_model=Message,
 )
 def _switch_actions_machines_control(state: bool):
     """
-    Switch on/off machines control actions
+    Switch on/off machines control system
 
     **Returns**: A message with the result of the operation
     """
@@ -205,3 +204,59 @@ def _switch_actions_machines_control(state: bool):
         actions_controller.machines_control_manager.running = state
 
         return Message(message="{}".format("Running" if state else "Not Running"))
+
+
+@actions.get(
+    "/actions/vm-optimizations",
+    summary="Get the result of the vm optimizations",
+    status_code=status.HTTP_200_OK,
+    response_model=dict[str, dict],
+)
+def _get_vm_optimizations(name: str = None):
+    """
+    Get the last vm optimizations
+
+    **Returns**: A dict with the vm optimizations
+
+    **Raises**: HTTPException (status code 404): VM Optimization not found
+    """
+    # If a name is provided, check if the vm optimization exists
+    if name:
+        if (
+            name
+            not in actions_controller.machines_control_manager.get_vm_optimizations()
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="VM Optimization '{}' not found".format(name),
+            )
+
+    return actions_controller.machines_control_manager.get_vm_optimizations(name)
+
+
+@actions.get(
+    "/actions/pm-optimizations",
+    summary="Get the result of the pm optimizations",
+    status_code=status.HTTP_200_OK,
+    response_model=dict[str, dict],
+)
+def _get_pm_optimizations(name: str = None):
+    """
+    Get the last pm optimizations
+
+    **Returns**: A dict with the pm optimizations
+
+    **Raises**: HTTPException (status code 404): PM Optimization not found
+    """
+    # If a name is provided, check if the pm optimization exists
+    if name:
+        if (
+            name
+            not in actions_controller.machines_control_manager.get_pm_optimizations()
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="PM Optimization '{}' not found".format(name),
+            )
+
+    return actions_controller.machines_control_manager.get_pm_optimizations(name)

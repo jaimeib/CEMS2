@@ -1,6 +1,8 @@
 CHANGES
 =======
 
+* Added all commands to cli
+* Added cems2cli (not completed)
 * VM Optimizations + VM Connections DONE
 * Changed value to str payload (json) in Metric Schema
 * Some fixes & improve the logic of the plugin pm\_connector-test
