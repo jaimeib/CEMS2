@@ -17,59 +17,40 @@ from cems2.machines_control.manager import Manager as MachinesControlManager
 
 LOG = log.get_logger(__name__)
 
-api_cancel_scope = trio.CancelScope()
-cloud_analytics_manager_cancel_scope = trio.CancelScope()
-machines_control_manager_cancel_scope = trio.CancelScope()
-
-
-def shutdown():
-    """Shutdown function."""
-    api_cancel_scope.cancel()
-    cloud_analytics_manager_cancel_scope.cancel()
-    machines_control_manager_cancel_scope.cancel()
-    LOG.info("Shutting down CEMS2")
-    sys.exit(0)
-
-
-signal.signal(signal.SIGTERM, shutdown)  # Register the shutdown function to the SIGTERM
-signal.signal(signal.SIGINT, shutdown)  # Register the shutdown function to the SIGINT
-
 
 async def start_api():
     """Start the API server."""
-    with api_cancel_scope:
+    try:
         LOG.info("Starting API server")
-
         # Run the API server in a separate thread
         await trio.to_thread.run_sync(
-            partial(uvicorn.run, api.api, host="localhost", port=8000)
+            partial(uvicorn.run, api.api, host="localhost", port=8000), cancellable=True
         )
+    except trio.Cancelled:
         # If the API server stops, log it
-        LOG.error("API server stopped")
+        LOG.critical("API server stopped")
 
 
 async def start_cloud_analytics_manager(cloud_analytics_manager):
     """Start the Cloud Analytics Manager."""
-    with cloud_analytics_manager_cancel_scope:
+    try:
         LOG.info("Starting Cloud Analytics Manager")
-
         # Run the Cloud Analytics Manager in a separate thread
-        await trio.to_thread.run_sync(cloud_analytics_manager.run)
-
+        await trio.to_thread.run_sync(cloud_analytics_manager.run, cancellable=True)
+    except trio.Cancelled:
         # If the Cloud Analytics Manager stops, log it
-        LOG.error("Cloud Analytics Manager stopped")
+        LOG.critical("Cloud Analytics Manager stopped")
 
 
 async def start_machines_control_manager(machines_control_manager):
     """Start the Machine Control Manager."""
-    with machines_control_manager_cancel_scope:
+    try:
         LOG.info("Starting Machine Control Manager")
-
         # Run the Machine Control Manager in a separate thread
-        await trio.to_thread.run_sync(machines_control_manager.run)
-
+        await trio.to_thread.run_sync(machines_control_manager.run, cancellable=True)
+    except trio.Cancelled:
         # If the Machine Control Manager stops, log it
-        LOG.error("Machine Control Manager stopped")
+        LOG.critical("Machine Control Manager stopped")
 
 
 async def async_main():
@@ -118,6 +99,12 @@ async def async_main():
         nursery.start_soon(start_cloud_analytics_manager, cloud_analytics_manager)
         # Start the Machine Control Manager (Task 3)
         nursery.start_soon(start_machines_control_manager, machines_control_manager)
+
+        try:
+            await trio.sleep_forever()
+        except KeyboardInterrupt:
+            LOG.warning("Stopping CEMS2")
+            nursery.cancel_scope.cancel()
 
 
 def main():
