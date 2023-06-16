@@ -104,10 +104,10 @@ def create_data():
     :rtype: dict
     """
     # Make a request to the API to get the list of machines available
-    API_URL = "http://localhost:8000"
+    api_url = "http://localhost:8000"
 
     # Get the list of machines available
-    machines = requests.get(f"{API_URL}/machines?avaliable=True").json()
+    machines = requests.get(f"{api_url}/machines?avaliable=True").json()
 
     # Get only the IP addresses
     machines_ips = [m["management_ip"] for m in machines]

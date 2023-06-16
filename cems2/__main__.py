@@ -1,7 +1,5 @@
 """CEMS2 Launcher."""
 
-import signal
-import sys
 from functools import partial
 
 import trio

@@ -17,7 +17,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the PM optimization manager."""
-
         # Running PM optimizations
         self.running_pm_optimizations = []
 

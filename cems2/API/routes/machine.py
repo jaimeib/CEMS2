@@ -114,7 +114,6 @@ class MachineManager(object):
         :return: The machine
         :rtype: Machine (Model)
         """
-
         try:
             machine = _get_machine_by_hostname(
                 hostname=hostname, db_session=next(get_db())

@@ -1,7 +1,5 @@
 """machines_control manager module."""
 
-import time
-
 import trio
 
 import cems2.machines_control.pm_connector.manager as pm_connector_manager
@@ -134,7 +132,6 @@ class Manager(object):
         - Get the PM optimizations
         - Apply the PM optimizations
         """
-
         # Load the managers
         self._load_managers()
 
@@ -148,7 +145,7 @@ class Manager(object):
         trio.run(self._run_async)
 
     async def _run_async(self):
-        """Run the machines_control manager asynchronously"""
+        """Run the machines_control manager asynchronously."""
         # Create 2 tasks to run in parallel: Running control and Control tasks
         async with trio.open_nursery() as nursery:
             # Start the running control task
@@ -276,7 +273,7 @@ class Manager(object):
 
     def new_baseline(self):
         """Update the baseline on the pm optimization plugins."""
-        self.pm_optimization.new_baseline(baseline)
+        self.pm_optimization.new_baseline(self.baseline)
 
     async def _boot_all(self):
         """Boot all the PMs."""

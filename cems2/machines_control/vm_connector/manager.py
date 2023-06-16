@@ -13,7 +13,7 @@ CONFIG = config_loader.get_config()
 
 
 class Manager(object):
-    """ "Manager for the VM Connectors."""
+    """Manager for the VM Connectors."""
 
     def __init__(self):
         """Initialize the VM connector manager."""
@@ -52,7 +52,6 @@ class Manager(object):
         :param optimization: The optimization to apply
         :type optimization: dict
         """
-
         # Remove from the optimization the VMs that are already in the correct PM
         for pm in optimization:
             for vm in optimization[pm]:
@@ -100,7 +99,6 @@ class Manager(object):
         :param vms: The VM
         :type vms: list
         """
-
         # Get the VM connector name from the VM metadata
         vms_connector_name = list(vms[0].values())[0]["managed_by"]
 

@@ -17,7 +17,6 @@ class Manager(object):
 
     def __init__(self):
         """Initialize the VM optimization manager."""
-
         # Running VM optimizations
         self.running_vm_optimizations = []
 
@@ -141,7 +140,7 @@ class Manager(object):
     async def _run_vm_optimization(
         self, vm_optimization_name, vm_optimization_cls, always, optimizations
     ):
-        """Run the VM optimization
+        """Run the VM optimization.
 
         :param vm_optimization_name: Name of the VM optimization
         :type vm_optimization_name: str

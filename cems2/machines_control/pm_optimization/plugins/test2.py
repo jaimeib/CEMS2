@@ -24,7 +24,6 @@ class Test2(PMOptimizationBase):
 
     async def run(self, always):
         """Run the PMs Optimization."""
-
         # Run the optimization
         while True:
             # Await the baseline to be recieved

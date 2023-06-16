@@ -121,6 +121,8 @@ def get_machine(
 
     :param available: Available.
     :type available: str
+
+    :raises typer.BadParameter: Only one identifier can be provided.
     """
 
     request = f"{API_BASE_URL}/machines"
@@ -129,7 +131,7 @@ def get_machine(
     # Check that only one identifier was provided
     if host and id:
         rich.print("[red]ERROR: Only one identifier can be provided.[/red]")
-        exit(1)
+        raise typer.BadParameter("Only one identifier can be provided.")
 
     # Add the identifier to the request if it was provided
     if host:
@@ -175,6 +177,29 @@ def get_machine(
 
 
 def add_filters(group, brand, connector, energy, monitoring, available):
+    """Add filters to the request.
+
+    :param group: Groupname of the machine.
+    :type group: str
+
+    :param brand: Brand name of the machine.
+    :type brand: str
+
+    :param connector: Connector name.
+    :type connector: str
+
+    :param energy: Energy status.
+    :type energy: str
+
+    :param monitoring: Monitoring.
+    :type monitoring: str
+
+    :param available: Available.
+    :type available: str
+
+    :return: Filters to be added to the request.
+    :rtype: dict
+    """
     # Make the request with the filters provided
     filters = {}
 
@@ -240,14 +265,16 @@ def update_monitoring(
 
     :param monitoring: Monitoring status of the machine.
     :type monitoring: str
-    """
 
+    :raises typer.BadParameter: Only one identifier can be provided.
+    :raises typer.BadParameter: No identifier provided.
+    """
     request = f"{API_BASE_URL}/machines"
 
     # Check that only one identifier was provided
     if host and id:
         rich.print("[red]ERROR: Only one identifier can be provided.[/red]")
-        exit(1)
+        raise typer.BadParameter("Only one identifier can be provided.")
 
     # Add the identifier to the request if it was provided
     if host:
@@ -258,7 +285,7 @@ def update_monitoring(
 
     else:
         rich.print("[red]ERROR: No identifier provided.[/red]")
-        exit(1)
+        raise typer.BadParameter("No identifier provided.")
 
     # Create the URL for the API call
     url = f"{request}?monitoring={monitoring}"
@@ -287,6 +314,11 @@ def update_monitoring(
 
 
 def add_machine_headers(table):
+    """Add headers to the machine table.
+
+    :param table: Table to add the headers.
+    :type table: rich.table.Table
+    """
     table.add_column("ID", style="cyan")
     table.add_column("Hostname")
     table.add_column("Groupname")
@@ -301,6 +333,14 @@ def add_machine_headers(table):
 
 
 def parse_machines(machine):
+    """Parse the machine information to be printed in a table.
+
+    :param machine: Machine information.
+    :type machine: dict
+
+    :return: Machine information parsed.
+    :rtype: dict
+    """
     # Add a row to the table if the machine is available print it in green, otherwise print it in red
     data = {}
     data["id"] = str(machine["id"])

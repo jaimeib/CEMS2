@@ -96,6 +96,7 @@ class Manager(object):
 
     def run(self):
         """Run the cloud_analytics manager.
+
         - Load the collector and reporter managers
         - Set the monitoring interval
         - Run periodically as the monitoring interval

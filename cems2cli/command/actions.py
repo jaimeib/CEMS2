@@ -242,8 +242,16 @@ def optimizations(
         None, "-n", "--name", help="Name of the optimization."
     ),
 ):
-    """Get results of optimizations installed on cems2 machine control system."""
+    """Get results of optimizations installed on cems2 machine control system.
 
+    :param subsystem: The subsystem to obtain the optimization [VM,PM]
+    :type subsystem: str
+
+    :param name: Name of the optimization.
+    :type name: str
+
+    :raises typer.BadParameter: If the subsystem is not "vm" or "pm"
+    """
     # Check if the subsystem is "vm" or "pm" or raise an error otherwise
     if subsystem not in ["vm", "pm", "VM", "PM"]:
         raise typer.BadParameter("Subsytem must be either 'vm' or 'pm' or 'VM' or 'PM'")
@@ -289,51 +297,13 @@ def optimizations(
 
         # Check if the API call was successful
         if response.status_code == HTTPstatus.HTTP_200_OK:
-            # Create a table
-            table = None
-
             # If the subsystem is "vm"
             if subsystem.lower() == "vm":
-                # Print the response as a table
-                table = rich.table.Table(
-                    title="CEMS2 Machine Control System VM Optimizations"
-                )
-
-                # Add headers to the table
-                table.add_column("Optimization Name", min_width=20)
-                table.add_column("Physical Machine", min_width=20)
-                table.add_column("Virtual Machines", min_width=20)
-
-                for optimization_name, optimization_result in response.json().items():
-                    for pm, vms in optimization_result.items():
-                        table.add_row(
-                            optimization_name,
-                            pm,
-                            _parse_vm(vms),
-                        )
+                _print_vm_optimization(response, progress, task)
 
             # If the subsystem is "pm"
             if subsystem.lower() == "pm":
-                table = rich.table.Table(
-                    title="CEMS2 Machine Control System PM Optimizations"
-                )
-
-                # Add headers to the table
-                table.add_column("Optimization Name", min_width=20)
-                table.add_column("Physical Machines ON", min_width=20)
-                table.add_column("Physical Machines OFF", min_width=20)
-
-                for optimization_name, optimization_result in response.json().items():
-                    table.add_row(
-                        optimization_name,
-                        str(optimization_result["on"]) + "\n",
-                        str(optimization_result["off"]) + "\n",
-                    )
-
-            progress.update(task, advance=100)
-
-            # Print the table
-            rich.print(table)
+                _print_pm_optimization(response, progress, task)
 
         # If the API call was not successful
         else:
@@ -341,7 +311,76 @@ def optimizations(
             rich.print(f"[red]Error: {response.json()['detail']}[/red]")
 
 
+def _print_vm_optimization(response, progress, task):
+    """Print the response of the API call to get the VM optimizations.
+
+    :param response: response of the API call
+    :type response: requests.models.Response
+
+    :param progress: rich progress bar
+    :type progress: rich.progress.Progress
+
+    :param task: task of the rich progress bar
+    :type task: rich.progress.Task
+    """
+    table = rich.table.Table(title="CEMS2 Machine Control System VM Optimizations")
+
+    # Add headers to the table
+    table.add_column("Optimization Name", min_width=20)
+    table.add_column("Physical Machine", min_width=20)
+    table.add_column("Virtual Machines", min_width=20)
+
+    for optimization_name, optimization_result in response.json().items():
+        for pm, vms in optimization_result.items():
+            table.add_row(
+                optimization_name,
+                pm,
+                _parse_vm(vms),
+            )
+    progress.update(task, advance=100)
+    # Print the table
+    rich.print(table)
+
+
+def _print_pm_optimization(response, progress, task):
+    """Print the response of the API call to get the PM optimizations.
+
+    :param response: response of the API call
+    :type response: requests.models.Response
+
+    :param progress: rich progress bar
+    :type progress: rich.progress.Progress
+
+    :param task: task of the rich progress bar
+    :type task: rich.progress.Task
+    """
+    table = rich.table.Table(title="CEMS2 Machine Control System PM Optimizations")
+
+    # Add headers to the table
+    table.add_column("Optimization Name", min_width=20)
+    table.add_column("Physical Machines ON", min_width=20)
+    table.add_column("Physical Machines OFF", min_width=20)
+
+    for optimization_name, optimization_result in response.json().items():
+        table.add_row(
+            optimization_name,
+            str(optimization_result["on"]) + "\n",
+            str(optimization_result["off"]) + "\n",
+        )
+    progress.update(task, advance=100)
+    # Print the table
+    rich.print(table)
+
+
 def _parse_vm(vms):
+    """Parse the response of the API call to get the VMs.
+
+    :param vms: dictionary with the VMs
+    :type vms: list[dict]
+
+    :return: VMs parsed as a table
+    :rtype: rich.table.Table
+    """
     # Create a table
     table = rich.table.Table()
 

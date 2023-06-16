@@ -12,6 +12,8 @@ LOG = log.get_logger(__name__)
 
 
 class Test2(VMConnectorBase):
+    """Test2 VM connector class."""
+
     def __init__(self):
         """Initialize the test connection."""
 

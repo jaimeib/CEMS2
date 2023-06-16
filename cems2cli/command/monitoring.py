@@ -317,6 +317,17 @@ def get_metrics(
 
 
 def parse_metrics(response, table):
+    """Parse the metrics response from the API call
+
+    :param response: Response from the API call.
+    :type response: dict
+
+    :param table: Table to print the metrics.
+    :type table: rich.table.Table
+
+    :return: Table with the metrics.
+    :rtype: rich.table.Table
+    """
     vms_list = []
     for machine, metrics in response.items():
         for metric in metrics:

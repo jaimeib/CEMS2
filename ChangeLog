@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+* CLI completed
+* Added cancellable main task
+* Completed to get the optimizations with the API
 * Added all commands to cli
 * Added cems2cli (not completed)
 * VM Optimizations + VM Connections DONE

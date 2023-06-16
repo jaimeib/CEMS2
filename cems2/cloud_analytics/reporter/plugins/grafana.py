@@ -1,5 +1,7 @@
 """Grafana Metric Reporter Plugin."""
 
+import rich
+
 from cems2 import log
 from cems2.cloud_analytics.reporter.base import MetricReporterBase
 

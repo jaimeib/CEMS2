@@ -25,7 +25,6 @@ class Test2(VMOptimizationBase):
 
     async def run(self, always):
         """Run the test VMs optimization."""
-
         while True:
             # Await the metrics to be recieved
             await self._wait_for_metrics()
@@ -67,7 +66,6 @@ class Test2(VMOptimizationBase):
         :return: The distribution.
         :rtype: dict
         """
-
         # Dict of utilizations (Key: hostname, Value: utilization)
         utilizations = {}
 
@@ -112,7 +110,6 @@ class Test2(VMOptimizationBase):
         :return: The utilizations.
         :rtype: dict
         """
-
         utilizations = {}
 
         for hostname, value in metrics.items():
@@ -144,7 +141,6 @@ class Test2(VMOptimizationBase):
         :return: The VMs on each machine.
         :rtype: dict
         """
-
         # Create a dict of list of VMs (Key: hostname, Value: list of VMs)
         distribution = {}
 
