@@ -208,7 +208,11 @@ def add_filters(group, brand, connector, energy, monitoring, available):
 # Command to update monitoring flag
 @machine_app.command("monitor", help="Update monitoring flag.")
 def update_monitoring(
-    monitoring: str,
+    monitoring: str = Argument(
+        help="If the machine has to be monitored or not [ON,OFF].",
+        case_sensitive=False,
+        show_default=False,
+    ),
     host: Optional[str] = Option(
         None,
         "-h",

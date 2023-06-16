@@ -224,7 +224,7 @@ def _get_vm_optimizations(name: str = None):
     if name:
         if (
             name
-            not in actions_controller.machines_control_manager.get_vm_optimizations()
+            not in actions_controller.machines_control_manager.vm_optimization.get_installed_plugins()
         ):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -252,7 +252,7 @@ def _get_pm_optimizations(name: str = None):
     if name:
         if (
             name
-            not in actions_controller.machines_control_manager.get_pm_optimizations()
+            not in actions_controller.machines_control_manager.pm_optimization.get_installed_plugins()
         ):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

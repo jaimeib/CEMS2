@@ -429,7 +429,7 @@ class Manager(object):
 
         return plugins
 
-    def get_vm_optimizations(self, name: str = None):
+    def get_vm_optimizations(self, name: str):
         """Obtain the VM optimizations.
 
         :param name: name of the VM optimization
@@ -442,7 +442,7 @@ class Manager(object):
         optimizations = trio.run(self.vm_optimization.get_vm_optimizations, name)
         return optimizations
 
-    def get_pm_optimizations(self, name: str = None):
+    def get_pm_optimizations(self, name: str):
         """Obtain the PM optimizations.
 
         :param name: name of the PM optimization

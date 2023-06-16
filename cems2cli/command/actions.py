@@ -1,11 +1,13 @@
 """Actions commands for the cems2cli command line interface."""
 
+import time
 from typing import Optional
 
 import requests
 import rich
 import typer
 from fastapi import status as HTTPstatus
+from rich.progress import Progress
 from typer import Argument, Option
 from typing_extensions import Annotated
 
@@ -223,3 +225,140 @@ def restart():
     else:
         # Print an error message
         rich.print(f"[red]Error: {response.json()['detail']}[/red]")
+
+
+@actions_app.command(
+    "optimizations",
+    help="Get results of optimizations installed on cems2 machine control system.",
+)
+# Has an argument called subsystem that is required and has to be or "vm" or "pm"
+def optimizations(
+    subsystem: str = Argument(
+        help="The subsystem to obtain the optimization [VM,PM]",
+        case_sensitive=False,
+        show_default=False,
+    ),
+    name: Optional[str] = Option(
+        None, "-n", "--name", help="Name of the optimization."
+    ),
+):
+    """Get results of optimizations installed on cems2 machine control system."""
+
+    # Check if the subsystem is "vm" or "pm" or raise an error otherwise
+    if subsystem not in ["vm", "pm", "VM", "PM"]:
+        raise typer.BadParameter("Subsytem must be either 'vm' or 'pm' or 'VM' or 'PM'")
+
+    # Create the URL for the API call
+    url = f"{API_BASE_URL}/actions/"
+
+    # If the subsystem is "vm"
+    if subsystem.lower() == "vm":
+        # Add "vm" to the URL
+        url += "vm-optimizations"
+
+    # If the subsystem is "pm"
+    if subsystem.lower() == "pm":
+        # Add "pm" to the URL
+        url += "pm-optimizations"
+
+    # Create a payload
+    payload = {}
+
+    # if the name is not None add it to the payload
+    if name is not None:
+        payload["name"] = name
+
+    # Make the API call and while waiting for the response, print a rich progress bar
+    with rich.progress.Progress(
+        rich.progress.TextColumn("[bold]{task.description}"),
+        rich.progress.BarColumn(),
+        rich.progress.TaskProgressColumn(),
+    ) as progress:
+        task = progress.add_task(
+            "Waiting for optimization...", total=100, start=False, complete=False
+        )
+
+        response = requests.get(url, params=payload)
+
+        progress.start_task(task)
+
+        # Updating the progress bar
+        for _ in range(100):
+            time.sleep(0.005)  # Simulating processing time for each iteration
+            progress.update(task, advance=1)
+
+        # Check if the API call was successful
+        if response.status_code == HTTPstatus.HTTP_200_OK:
+            # Create a table
+            table = None
+
+            # If the subsystem is "vm"
+            if subsystem.lower() == "vm":
+                # Print the response as a table
+                table = rich.table.Table(
+                    title="CEMS2 Machine Control System VM Optimizations"
+                )
+
+                # Add headers to the table
+                table.add_column("Optimization Name", min_width=20)
+                table.add_column("Physical Machine", min_width=20)
+                table.add_column("Virtual Machines", min_width=20)
+
+                for optimization_name, optimization_result in response.json().items():
+                    for pm, vms in optimization_result.items():
+                        table.add_row(
+                            optimization_name,
+                            pm,
+                            _parse_vm(vms),
+                        )
+
+            # If the subsystem is "pm"
+            if subsystem.lower() == "pm":
+                table = rich.table.Table(
+                    title="CEMS2 Machine Control System PM Optimizations"
+                )
+
+                # Add headers to the table
+                table.add_column("Optimization Name", min_width=20)
+                table.add_column("Physical Machines ON", min_width=20)
+                table.add_column("Physical Machines OFF", min_width=20)
+
+                for optimization_name, optimization_result in response.json().items():
+                    table.add_row(
+                        optimization_name,
+                        str(optimization_result["on"]) + "\n",
+                        str(optimization_result["off"]) + "\n",
+                    )
+
+            progress.update(task, advance=100)
+
+            # Print the table
+            rich.print(table)
+
+        # If the API call was not successful
+        else:
+            # Print an error message
+            rich.print(f"[red]Error: {response.json()['detail']}[/red]")
+
+
+def _parse_vm(vms):
+    # Create a table
+    table = rich.table.Table()
+
+    # Add headers to the table
+    table.add_column("VM UUID", min_width=40)
+    table.add_column("VCPUs", min_width=5)
+    table.add_column("Memory", min_width=10)
+    table.add_column("Disk", min_width=10)
+    table.add_column("Managed by", min_width=10)
+
+    for vm in vms:
+        for vm_uuid, vm_info in vm.items():
+            nvcpus = str(vm_info["vcpus"])
+            memory = str(vm_info["memory"]["amount"]) + " " + vm_info["memory"]["unit"]
+            disk = str(vm_info["disk"]["amount"]) + " " + vm_info["disk"]["unit"]
+            managed_by = vm_info["managed_by"]
+            table.add_row(vm_uuid, nvcpus, memory, disk, managed_by)
+
+    # Print the table
+    return table

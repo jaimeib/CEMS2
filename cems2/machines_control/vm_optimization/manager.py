@@ -97,7 +97,7 @@ class Manager(object):
         """
         return plugin_loader.get_vm_optimizations_names()
 
-    async def get_vm_optimizations(self, name: str = None):
+    async def get_vm_optimizations(self, name: str):
         """Get the VM optimizations.
 
         :param name: Name of the VM optimization to get

@@ -10,6 +10,7 @@ from fastapi import status as HTTPstatus
 from typer import Option
 
 from cems2cli import config_loader
+from cems2cli.command.actions import _parse_vm
 
 # Get the configuration
 CONFIG = config_loader.get_config()
@@ -297,8 +298,6 @@ def get_metrics(
     if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
 
-        rich.print(response.json())
-
         table = rich.table.Table(title="CEMS2 Cloud Analytics System Metrics")
 
         table.add_column("Name")
@@ -318,14 +317,31 @@ def get_metrics(
 
 
 def parse_metrics(response, table):
+    vms_list = []
     for machine, metrics in response.items():
         for metric in metrics:
-            table.add_row(
-                metric["name"],
-                metric["payload"],
-                metric["hostname"],
-                metric["collected_from"],
-                metric["timestamp"],
-            )
+            if metric["name"] == "vms":
+                for vm_uuid, vm_info in json.loads(metric["payload"]).items():
+                    vms_list.append({vm_uuid: vm_info})
+                table.add_row(
+                    metric["name"],
+                    _parse_vm(vms_list),
+                    metric["hostname"],
+                    metric["collected_from"],
+                    metric["timestamp"],
+                )
+                vms_list = []
+            else:
+                # Get the payload as a string of a value and a unit from the dictionary
+                payload = json.loads(metric["payload"])
+                value = str(payload["value"]) + " " + payload["unit"] + "\n"
+
+                table.add_row(
+                    "\n" + metric["name"],
+                    "\n" + value,
+                    "\n" + metric["hostname"],
+                    "\n" + metric["collected_from"],
+                    "\n" + metric["timestamp"],
+                )
 
     return table

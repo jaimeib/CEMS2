@@ -192,7 +192,7 @@ class Manager(object):
         # Add the Loaded status if there are in the config file
         for plugin in collectors:
             if plugin.name in CONFIG.getlist("cloud_analytics.plugins", "collectors"):
-                plugin.status = "Loaded"
+                plugin.status = "loaded"
 
         plugins.extend(collectors)
 
@@ -206,7 +206,7 @@ class Manager(object):
         # Add the Loaded status if there are in the config file
         for plugin in reporters:
             if plugin.name in CONFIG.getlist("cloud_analytics.plugins", "reporters"):
-                plugin.status = "Loaded"
+                plugin.status = "loaded"
 
         plugins.extend(reporters)
 
