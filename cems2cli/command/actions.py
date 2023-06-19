@@ -58,6 +58,13 @@ def get_plugins(
     # Create the URL for the API call
     url = f"{API_BASE_URL}/actions/plugins"
 
+    # Call the common method to process the plugins
+    process_plugins(url, str(TITLE + "Plugins"), type, status)
+
+
+def process_plugins(
+    request_url: str, table_title: str, type: str = None, status: str = None
+):
     # Create a payload
     payload = {}
 
@@ -70,13 +77,13 @@ def get_plugins(
         payload["status"] = status
 
     # Make the API call
-    response = requests.get(url, params=payload)
+    response = requests.get(request_url, params=payload)
 
     # Check if the API call was successful
     if response.status_code == HTTPstatus.HTTP_200_OK:
         # Print the response as a table
 
-        table = rich.table.Table(title="CEMS2 Machine Control System Plugins")
+        table = rich.table.Table(title=table_title)
 
         table.add_column("Name", min_width=20)
         table.add_column("Type", min_width=20)

@@ -8,4 +8,4 @@ class Plugin(BaseModel):
 
     name: str = Field(..., example="Utilization")
     type: str = Field(..., example="Collector")
-    status: str = Field(..., example="Installed")  # TODO: Installed, Loaded, Default
+    status: str = Field(..., example="Installed")
