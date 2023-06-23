@@ -31,16 +31,16 @@
   management_password: admin
   connector: test
 
-- groupname: cloudB
-  brand_model: Lenovo
-  hostname_range: [cloudB01, cloudB05]
-  management_ip_range: [10.128.2.1, 10.128.2.5]
-  management_username: LenovoAdmin
-  management_password: LenovoPass
-  connector: test
-  hosts:
-      - hostname: cloudB02
-        management_ip: 10.128.2.10 #Specific IP
+# - groupname: cloudB
+#   brand_model: Lenovo
+#   hostname_range: [cloudB01, cloudB05]
+#   management_ip_range: [10.128.2.1, 10.128.2.5]
+#   management_username: LenovoAdmin
+#   management_password: LenovoPass
+#   connector: test
+#   hosts:
+#       - hostname: cloudB02
+#         management_ip: 10.128.2.10 #Specific IP
 
 - groupname: cloudC
   brand_model: Dell

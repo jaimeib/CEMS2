@@ -44,7 +44,7 @@ class Test2(MetricCollectorBase):
             payload=payload_json,
             timestamp=datetime.now(),
             hostname=machine_id,
-            collected_from="test2",
+            collected_by="test2",
         )
 
         rich.print("TEST-COLLECTOR", metric)

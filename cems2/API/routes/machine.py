@@ -203,6 +203,7 @@ def _get_machines(
     - **management_ip**: The IP address to manage the machine (unique)
     - **management_username**: The username to manage the machine
     - **management_password**: The password to manage the machine
+    - **connector**: The connector name of the machine
     - **energy_status**: True if the machine is on, False otherwise
     - **monitoring**: True if the machine is being monitored, False otherwise
     - **available**: True if the machine is availabled on the system, False otherwise

@@ -18,7 +18,7 @@ LOG = log.get_logger(__name__)
 
 def load_hosts(datafile):
     """Load the initial data .yaml file into the database."""
-    LOG.info("Loading the hosts.yaml file into the database.")
+    LOG.info("Loading the {} file into the database...".format(datafile))
 
     # Create the tables in the database
     create_tables()
@@ -35,7 +35,7 @@ def load_hosts(datafile):
     # Update the available machines in the database
     _update_available_machines(hosts_list)
 
-    LOG.info("The hosts.yaml file has been loaded into the database.")
+    LOG.info("The {} file has been loaded successfully.".format(datafile))
 
 
 def _read_groups(file):

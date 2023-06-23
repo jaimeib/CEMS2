@@ -187,6 +187,12 @@ class Manager(object):
         - Notify the API controller to monitor the system again
         """
         while True:
+            # If the running status is set to False
+            if not self.running:
+                # Wait until the running status is set to True
+                while not self.running:
+                    await trio.sleep(1)
+
             # Wait for new metrics event trigger
             while not self.new_metrics_event:
                 await trio.sleep(1)
@@ -326,9 +332,10 @@ class Manager(object):
             if cancel_scope.cancelled_caught:
                 LOG.error(
                     "PM Connector plugin '%s' timed out for machine: %s",
-                    machine.pm_connector,
+                    machine.connector,
                     machine.hostname,
                 )
+                machine.energy_status = False  # Set the state to off
 
         # Notify the API controller of the current state of the PMs
         self.api_controller.notify_machine_status(available_pms)

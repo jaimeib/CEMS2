@@ -61,7 +61,7 @@ class TestVMs(MetricCollectorBase):
             payload=vms_json,
             timestamp=datetime.now(),
             hostname=machine_id,
-            collected_from="test_VMs",
+            collected_by="test_VMs",
         )
 
         rich.print("TEST-COLLECTOR", metric)

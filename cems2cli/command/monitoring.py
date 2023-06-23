@@ -303,7 +303,7 @@ def parse_metrics(response, table):
                     metric["name"],
                     _parse_vm(vms_list),
                     metric["hostname"],
-                    metric["collected_from"],
+                    metric["collected_by"],
                     metric["timestamp"],
                 )
                 vms_list = []
@@ -316,7 +316,7 @@ def parse_metrics(response, table):
                     "\n" + metric["name"],
                     "\n" + value,
                     "\n" + metric["hostname"],
-                    "\n" + metric["collected_from"],
+                    "\n" + metric["collected_by"],
                     "\n" + metric["timestamp"],
                 )
 
