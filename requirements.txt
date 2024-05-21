@@ -54,7 +54,7 @@ platformdirs==4.2.0
 pluggy==1.4.0
 pydantic==2.6.4
 pydantic_core==2.16.3
-PyMySQL==1.1.0
+PyMySQL==1.1.1
 pyparsing==3.1.2
 pyproject-api==1.6.1
 pyproject_hooks==1.0.0
