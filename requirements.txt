@@ -86,4 +86,4 @@ virtualenv==20.25.1
 watchfiles==0.21.0
 websockets==12.0
 wrapt==1.16.0
-zipp==3.18.1
+zipp==3.19.1
